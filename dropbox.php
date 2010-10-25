@@ -8,6 +8,9 @@
  * The class is documented in the file itself. If you find any bugs help me out and report them. Reporting can be done by sending an email to php-dropbox-bugs[at]verkoyen[dot]eu.
  * If you report a bug, make sure you give me enough information (include your code).
  *
+ * Changelog since 1.0.0
+ * - fixed some issues with generation off the basestring
+ *
  * License
  * Copyright (c) 2010, Tijs Verkoyen. All rights reserved.
  *
@@ -20,7 +23,7 @@
  * This software is provided by the author "as is" and any express or implied warranties, including, but not limited to, the implied warranties of merchantability and fitness for a particular purpose are disclaimed. In no event shall the author be liable for any direct, indirect, incidental, special, exemplary, or consequential damages (including, but not limited to, procurement of substitute goods or services; loss of use, data, or profits; or business interruption) however caused and on any theory of liability, whether in contract, strict liability, or tort (including negligence or otherwise) arising in any way out of the use of this software, even if advised of the possibility of such damage.
  *
  * @author		Tijs Verkoyen <php-dropbox@verkoyen.eu>
- * @version		1.0.0
+ * @version		1.0.1
  *
  * @copyright	Copyright (c) 2010, Tijs Verkoyen. All rights reserved.
  * @license		BSD License
@@ -38,7 +41,7 @@ class Dropbox
 	const API_PORT = 443;
 
 	// current version
-	const VERSION = '1.0.0';
+	const VERSION = '1.0.1';
 
 
 	/**
@@ -199,13 +202,16 @@ class Dropbox
 		// process queries
 		foreach($parameters as $key => $value)
 		{
-			$chunks[] = self::urlencode_rfc3986($key) .'%3D'. self::urlencode_rfc3986($value);
+			// only add if not already in the url
+			if(substr_count($url, $key .'='. $value) == 0) $chunks[] = self::urlencode_rfc3986($key) .'%3D'. self::urlencode_rfc3986($value);
 		}
 
 		// buils base
 		$base = $method .'&';
-		$base .= urlencode($url) .'&';
+		$base .= urlencode($url);
+		$base .= (substr_count($url, '?')) ? '%26' : '&';
 		$base .= implode('%26', $chunks);
+		$base = str_replace('%3F', '&', $base);
 
 		// return
 		return $base;
@@ -218,8 +224,9 @@ class Dropbox
 	 *
 	 * @return	string
 	 * @param	array $parameters
+	 * @param	string $url
 	 */
-	private function calculateHeader(array $parameters, $url = null)
+	private function calculateHeader(array $parameters, $url)
 	{
 		// redefine
 		$url = (string) $url;
@@ -275,7 +282,7 @@ class Dropbox
 		$options[CURLOPT_URL] = self::API_URL .'/'. $url;
 		$options[CURLOPT_PORT] = self::API_PORT;
 		$options[CURLOPT_USERAGENT] = $this->getUserAgent();
-		$options[CURLOPT_FOLLOWLOCATION] = true;
+		if(ini_get('open_basedir') == '' && ini_get('safe_mode' == 'Off')) $options[CURLOPT_FOLLOWLOCATION] = true;
 		$options[CURLOPT_RETURNTRANSFER] = true;
 		$options[CURLOPT_TIMEOUT] = (int) $this->getTimeOut();
 		$options[CURLOPT_SSL_VERIFYPEER] = false;
@@ -285,7 +292,7 @@ class Dropbox
 		$options[CURLOPT_POSTFIELDS] = $this->buildQuery($parameters);
 
 		// init
-		if($this->curl == null) $this->curl = curl_init();
+		$this->curl = curl_init();
 
 		// set options
 		curl_setopt_array($this->curl, $options);
@@ -310,10 +317,12 @@ class Dropbox
 	 * Make the call
 	 *
 	 * @return	string
-	 * @param	string $url
-	 * @param	array[optiona] $aParameters
-	 * @param	bool[optional] $authenticate
-	 * @param	bool[optional] $usePost
+	 * @param	string $url						The url to call.
+	 * @param	array[optiona] $parameters		Optional parameters.
+	 * @param	bool[optional] $method			The method to use. Possible values are GET, POST.
+	 * @param	string[optional] $filePath		The path to the file to upload.
+	 * @param	bool[optional] $expectJSON		Do we expect JSON?
+	 * @param	bool[optional] $isContent		Is this content?
 	 */
 	private function doCall($url, array $parameters = null, $method = 'GET', $filePath = null, $expectJSON = true, $isContent = false)
 	{
@@ -341,6 +350,20 @@ class Dropbox
 		$data = $oauth;
 		if(!empty($parameters)) $data = array_merge($data, $parameters);
 
+		if($filePath != null)
+		{
+			// process file
+			$fileInfo = pathinfo($filePath);
+
+			// add to the data
+			$data['file'] = $fileInfo['basename'];
+
+		}
+
+		// calculate the base string
+		if($isContent) $base = $this->calculateBaseString(self::API_CONTENT_URL .'/'. $url, $method, $data);
+		else $base = $this->calculateBaseString(self::API_URL .'/'. $url, $method, $data);
+
 		// based on the method, we should handle the parameters in a different way
 		if($method == 'POST')
 		{
@@ -349,9 +372,6 @@ class Dropbox
 			{
 				// build a boundary
 				$boundary = md5(time());
-
-				// process file
-				$fileInfo = pathinfo($filePath);
 
 				// init var
 				$content = '--'. $boundary ."\r\n";
@@ -370,9 +390,6 @@ class Dropbox
 
 				// set content
 				$options[CURLOPT_POSTFIELDS] = $content;
-
-				// add to the data
-				$data['file'] = $fileInfo['basename'];
 			}
 
 			// no file
@@ -388,10 +405,6 @@ class Dropbox
 			if(!empty($parameters)) $url .= '?'. $this->buildQuery($parameters);
 		}
 
-		// calculate the base string
-		if($isContent) $base = $this->calculateBaseString(self::API_CONTENT_URL .'/'. $url, $method, $data);
-		else $base = $this->calculateBaseString(self::API_URL .'/'. $url, $method, $data);
-
 		// add sign into the parameters
 		$oauth['oauth_signature'] = $this->hmacsha1($this->getApplicationSecret() .'&' . $this->getOAuthTokenSecret(), $base);
 
@@ -404,7 +417,7 @@ class Dropbox
 		else $options[CURLOPT_URL] = self::API_URL .'/'. $url;
 		$options[CURLOPT_PORT] = self::API_PORT;
 		$options[CURLOPT_USERAGENT] = $this->getUserAgent();
-		$options[CURLOPT_FOLLOWLOCATION] = true;
+		if(ini_get('open_basedir') == '' && ini_get('safe_mode' == 'Off')) $options[CURLOPT_FOLLOWLOCATION] = true;
 		$options[CURLOPT_RETURNTRANSFER] = true;
 		$options[CURLOPT_TIMEOUT] = (int) $this->getTimeOut();
 		$options[CURLOPT_SSL_VERIFYPEER] = false;
@@ -428,6 +441,11 @@ class Dropbox
 
 		if(!$expectJSON && $isContent)
 		{
+			// is it JSON?
+			$json = @json_decode($response, true);
+			if($json !== false && isset($json['error'])) throw new DropboxException($json['error']);
+
+			// set return
 			$return['content_type'] = $headers['content_type'];
 			$return['data'] = base64_encode($response);
 
@@ -435,7 +453,7 @@ class Dropbox
 			return $return;
 		}
 
-		// we don't expext JSON, return the response
+		// we don't expect JSON, return the response
 		if(!$expectJSON) return $response;
 
 		// replace ids with their string values, added because of some PHP-version can't handle these large values
@@ -489,8 +507,9 @@ class Dropbox
 				echo '</pre>';
 			}
 
-			if(isset($json['error']['hash'])) $message = (string) $json['error']['hash'];
-			else $message = (string) $json['error'];
+			if(isset($json['error']) && is_string($json['error'])) $message = $json['error'];
+			elseif(isset($json['error']['hash']) && $json['error']['hash'] != '') $message = (string) $json['error']['hash'];
+			else $message = 'Invalid response.';
 
 			// throw exception
 			throw new DropboxException($message);
@@ -778,7 +797,6 @@ class Dropbox
 		$url .= ($sandbox) ? 'sandbox/' : 'dropbox/';
 		$url .= (string) $path;
 
-
 		// make the call
 		return $this->doCall($url, null, 'POST', $localFile, true, true);
 	}
@@ -809,7 +827,7 @@ class Dropbox
 		$parameters['list'] = ($list) ? 'true': 'false';
 
 		// make the call
-		return $this->doCall($url, $parameters);
+		return (array) $this->doCall($url, $parameters);
 	}
 
 
