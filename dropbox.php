@@ -8,6 +8,9 @@
  * The class is documented in the file itself. If you find any bugs help me out and report them. Reporting can be done by sending an email to php-dropbox-bugs[at]verkoyen[dot]eu.
  * If you report a bug, make sure you give me enough information (include your code).
  *
+ * Changelog since 1.0.2
+ * - Added methods to enable oauth-usage.
+ *
  * Changelog since 1.0.1
  * - Bugfix: when doing multiple calles where GET and POST is mixed, the postfields should be reset (thx to Daniel Hüsken)
  *
@@ -15,7 +18,7 @@
  * - fixed some issues with generation off the basestring
  *
  * License
- * Copyright (c) 2010, Tijs Verkoyen. All rights reserved.
+ * Copyright (c), Tijs Verkoyen. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
  *
@@ -26,9 +29,9 @@
  * This software is provided by the author "as is" and any express or implied warranties, including, but not limited to, the implied warranties of merchantability and fitness for a particular purpose are disclaimed. In no event shall the author be liable for any direct, indirect, incidental, special, exemplary, or consequential damages (including, but not limited to, procurement of substitute goods or services; loss of use, data, or profits; or business interruption) however caused and on any theory of liability, whether in contract, strict liability, or tort (including negligence or otherwise) arising in any way out of the use of this software, even if advised of the possibility of such damage.
  *
  * @author		Tijs Verkoyen <php-dropbox@verkoyen.eu>
- * @version		1.0.2
+ * @version		1.0.3
  *
- * @copyright	Copyright (c) 2010, Tijs Verkoyen. All rights reserved.
+ * @copyright	Copyright (c), Tijs Verkoyen. All rights reserved.
  * @license		BSD License
  */
 class Dropbox
@@ -44,7 +47,7 @@ class Dropbox
 	const API_PORT = 443;
 
 	// current version
-	const VERSION = '1.0.2';
+	const VERSION = '1.0.3';
 
 
 	/**
@@ -272,7 +275,7 @@ class Dropbox
 	 * @param	string $method
 	 * @param	array[optional] $parameters
 	 */
-	private function doOAuthCall($url, array $parameters = null)
+	private function doOAuthCall($url, array $parameters = null, $method = 'POST', $expectJSON = true)
 	{
 		// redefine
 		$url = (string) $url;
@@ -293,6 +296,22 @@ class Dropbox
 		// calculate header
 		$header = $this->calculateHeader($parameters, self::API_URL .'/'. $url);
 
+		if($method == 'POST')
+		{
+			$options[CURLOPT_POST] = true;
+			$options[CURLOPT_POSTFIELDS] = $this->buildQuery($parameters);
+		}
+
+		else
+		{
+			// reset post
+			$options[CURLOPT_POST] = 0;
+			unset($options[CURLOPT_POSTFIELDS]);
+
+			// add the parameters into the querystring
+			if(!empty($parameters)) $url .= '?'. $this->buildQuery($parameters);
+		}
+
 		// set options
 		$options[CURLOPT_URL] = self::API_URL .'/'. $url;
 		$options[CURLOPT_PORT] = self::API_PORT;
@@ -303,8 +322,6 @@ class Dropbox
 		$options[CURLOPT_SSL_VERIFYPEER] = false;
 		$options[CURLOPT_SSL_VERIFYHOST] = false;
 		$options[CURLOPT_HTTPHEADER] = array('Expect:');
-		$options[CURLOPT_POST] = true;
-		$options[CURLOPT_POSTFIELDS] = $this->buildQuery($parameters);
 
 		// init
 		$this->curl = curl_init();
@@ -324,7 +341,10 @@ class Dropbox
 		if($errorNumber != '') throw new DropboxException($errorMessage, $errorNumber);
 
 		// return
-		return json_decode($response, true);
+		if($expectJSON) return json_decode($response, true);
+
+		// fallback
+		return $response;
 	}
 
 
@@ -715,6 +735,101 @@ class Dropbox
 
 			return str_replace($search, $replace, rawurlencode($value));
 		}
+	}
+
+
+// oauth resources
+	/**
+	 * Call for obtaining an OAuth request token.
+	 * Returns a request token and the corresponding request token secret. This token and secret cannot be used to sign requests for the /metadata and /file content API calls.
+	 * Their only purpose is for signing a request to oauth/access_token once the user has gone through the application authorization steps provided by oauth/authorize.
+	 *
+	 * @return	array
+	 */
+	public function oAuthRequestToken()
+	{
+		// make the call
+		$response = $this->doOAuthCall('0/oauth/request_token', null, 'POST', false);
+
+		// process response
+		$response = (array) explode('&', $response);
+		$return = array();
+
+		// loop chunks
+		foreach($response as $chunk)
+		{
+			// split again
+			$chunks = explode('=', $chunk, 2);
+
+			// store return
+			if(count($chunks) == 2) $return[$chunks[0]] = $chunks[1];
+		}
+
+		// return
+		return $return;
+	}
+
+
+	/**
+	 * Redirect the user to the oauth/authorize location so that Dropbox can authenticate the user and ask whether or not the user wants to authorize the application to access
+	 * file metadata and content on its behalf. oauth/authorize is not an API call per se, because it does not have a return value, but rather directs the user to a page on
+	 * api.dropbox.com where they are provided means to log in to Dropbox and grant authority to the application requesting it.
+	 * The page served by oauth/authorize should be presented to the user through their web browser.
+	 * Please note, without directing the user to a Dropbox-provided page via oauth/authorize, it is impossible for your application to use the request token it received
+	 * via oauth/request_token to obtain an access token from oauth/access_token.
+	 *
+	 * @return	void
+	 * @param	string $oauthToken					The request token of the application requesting authority from a user.
+	 * @param	string[optional] $oauthCallback		After the user authorizes an application, the user is redirected to the application-served URL provided by this parameter.
+	 */
+	public function oAuthAuthorize($oauthToken, $oauthCallback = null)
+	{
+		// build parameters
+		$parameters = array();
+		$parameters['oauth_token'] = (string) $oauthToken;
+		if($oauthCallback !== null) $parameters['oauth_callback'] = (string) $oauthCallback;
+
+		// build url
+		$url = self::API_URL .'/0/oauth/authorize?'. http_build_query($parameters);
+
+		// redirect
+		header('Location: '. $url);
+		exit;
+	}
+
+
+	/**
+	 * This call returns a access token and the corresponding access token secret.
+	 * Upon return, the authorization process is now complete and the access token and corresponding secret are used to sign requests for the metadata and file content API calls.
+	 *
+	 * @return	array
+	 * @param	string $oauthToken	The token returned after authorizing
+	 */
+	public function oAuthAccessToken($oauthToken)
+	{
+		// build parameters
+		$parameters = array();
+		$parameters['oauth_token'] = (string) $oauthToken;
+
+		// make the call
+		$response = $this->doOAuthCall('0/oauth/access_token', $parameters, 'POST', false);
+
+		// process response
+		$response = (array) explode('&', $response);
+		$return = array();
+
+		// loop chunks
+		foreach($response as $chunk)
+		{
+			// split again
+			$chunks = explode('=', $chunk, 2);
+
+			// store return
+			if(count($chunks) == 2) $return[$chunks[0]] = $chunks[1];
+		}
+
+		// return
+		return $return;
 	}
 
 
