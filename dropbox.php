@@ -8,6 +8,9 @@
  * The class is documented in the file itself. If you find any bugs help me out and report them. Reporting can be done by sending an email to php-dropbox-bugs[at]verkoyen[dot]eu.
  * If you report a bug, make sure you give me enough information (include your code).
  *
+ * Changelog since 1.0.3
+ * - Corrected the authorize-URL (thx to Jacob Budin)
+ *
  * Changelog since 1.0.2
  * - Added methods to enable oauth-usage.
  *
@@ -41,6 +44,7 @@ class Dropbox
 
 	// url for the dropbox-api
 	const API_URL = 'https://api.dropbox.com';
+	const API_AUTH_URL = 'https://www.dropbox.com';
 	const API_CONTENT_URL = 'https://api-content.dropbox.com';
 
 	// port for the dropbox-api
@@ -790,7 +794,7 @@ class Dropbox
 		if($oauthCallback !== null) $parameters['oauth_callback'] = (string) $oauthCallback;
 
 		// build url
-		$url = self::API_URL .'/0/oauth/authorize?'. http_build_query($parameters);
+		$url = self::API_AUTH_URL .'/0/oauth/authorize?'. http_build_query($parameters);
 
 		// redirect
 		header('Location: '. $url);
