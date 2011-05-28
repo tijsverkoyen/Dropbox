@@ -9,7 +9,8 @@
  * If you report a bug, make sure you give me enough information (include your code).
  *
  * Changelog since 1.0.3
- * - Corrected the authorize-URL (thx to Jacob Budin)
+ * - Corrected the authorize-URL (thx to Jacob Budin).
+ * - Fixed filesPost so it returns a boolean.
  *
  * Changelog since 1.0.2
  * - Added methods to enable oauth-usage.
@@ -943,7 +944,10 @@ class Dropbox
 		$url .= trim((string) $path, '/');
 
 		// make the call
-		return $this->doCall($url, null, 'POST', $localFile, true, true);
+		$return = $this->doCall($url, null, 'POST', $localFile, true, true);
+
+		// return the result
+		return (bool) (isset($return['result']) && $return['result'] == 'winner!');
 	}
 
 
