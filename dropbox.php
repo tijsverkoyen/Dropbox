@@ -167,7 +167,7 @@ class Dropbox
 		}
 
 		// process parameters
-		foreach($parameters as $key => $value) $chunks[] = $key .'='. str_replace('%25', '%', $value);
+		foreach($parameters as $key => $value) $chunks[] = $key . '=' . str_replace('%25', '%', $value);
 
 		// return
 		return implode('&', $chunks);
@@ -213,7 +213,7 @@ class Dropbox
 		foreach($parameters as $key => $value)
 		{
 			// only add if not already in the url
-			if(substr_count($url, $key .'='. $value) == 0) $chunks[] = self::urlencode_rfc3986($key) .'%3D'. self::urlencode_rfc3986($value);
+			if(substr_count($url, $key . '=' . $value) == 0) $chunks[] = self::urlencode_rfc3986($key) . '%3D' . self::urlencode_rfc3986($value);
 		}
 
 		$urlChunks = explode('/', $url);
@@ -229,7 +229,7 @@ class Dropbox
 		}
 
 		// build base
-		$base = $method .'&';
+		$base = $method . '&';
 		$base .= implode('%2F', $urlChunks);
 		$base .= (substr_count($url, '?')) ? '%26' : '&';
 		$base .= implode('%26', $chunks);
@@ -260,7 +260,7 @@ class Dropbox
 		$chunks = array();
 
 		// process queries
-		foreach($parameters as $key => $value) $chunks[] = str_replace('%25', '%', self::urlencode_rfc3986($key) .'="'. self::urlencode_rfc3986($value) .'"');
+		foreach($parameters as $key => $value) $chunks[] = str_replace('%25', '%', self::urlencode_rfc3986($key) . '="' . self::urlencode_rfc3986($value) . '"');
 
 		// build return
 		$return = 'Authorization: OAuth realm="' . $parts['scheme'] . '://' . $parts['host'] . $parts['path'] . '", ';
@@ -292,13 +292,13 @@ class Dropbox
 		$parameters['oauth_version'] = '1.0';
 
 		// calculate the base string
-		$base = $this->calculateBaseString(self::API_URL .'/'. $url, 'POST', $parameters);
+		$base = $this->calculateBaseString(self::API_URL . '/' . $url, 'POST', $parameters);
 
 		// add sign into the parameters
-		$parameters['oauth_signature'] = $this->hmacsha1($this->getApplicationSecret() .'&' . $this->getOAuthTokenSecret(), $base);
+		$parameters['oauth_signature'] = $this->hmacsha1($this->getApplicationSecret() . '&' . $this->getOAuthTokenSecret(), $base);
 
 		// calculate header
-		$header = $this->calculateHeader($parameters, self::API_URL .'/'. $url);
+		$header = $this->calculateHeader($parameters, self::API_URL . '/' . $url);
 
 		if($method == 'POST')
 		{
@@ -313,11 +313,11 @@ class Dropbox
 			unset($options[CURLOPT_POSTFIELDS]);
 
 			// add the parameters into the querystring
-			if(!empty($parameters)) $url .= '?'. $this->buildQuery($parameters);
+			if(!empty($parameters)) $url .= '?' . $this->buildQuery($parameters);
 		}
 
 		// set options
-		$options[CURLOPT_URL] = self::API_URL .'/'. $url;
+		$options[CURLOPT_URL] = self::API_URL . '/' . $url;
 		$options[CURLOPT_PORT] = self::API_PORT;
 		$options[CURLOPT_USERAGENT] = $this->getUserAgent();
 		if(ini_get('open_basedir') == '' && ini_get('safe_mode' == 'Off')) $options[CURLOPT_FOLLOWLOCATION] = true;
@@ -375,7 +375,7 @@ class Dropbox
 		$expectJSON = (bool) $expectJSON;
 
 		// validate method
-		if(!in_array($method, $allowedMethods)) throw new DropboxException('Unknown method ('. $method .'). Allowed methods are: '. implode(', ', $allowedMethods));
+		if(!in_array($method, $allowedMethods)) throw new DropboxException('Unknown method (' . $method . '). Allowed methods are: ' . implode(', ', $allowedMethods));
 
 		// append default parameters
 		$oauth['oauth_consumer_key'] = $this->getApplicationKey();
@@ -407,8 +407,8 @@ class Dropbox
 		}
 
 		// calculate the base string
-		if($isContent) $base = $this->calculateBaseString(self::API_CONTENT_URL .'/'. $url, $method, $data);
-		else $base = $this->calculateBaseString(self::API_URL .'/'. $url, $method, $data);
+		if($isContent) $base = $this->calculateBaseString(self::API_CONTENT_URL . '/' . $url, $method, $data);
+		else $base = $this->calculateBaseString(self::API_URL . '/' . $url, $method, $data);
 
 		// based on the method, we should handle the parameters in a different way
 		if($method == 'POST')
@@ -420,19 +420,19 @@ class Dropbox
 				$boundary = md5(time());
 
 				// init var
-				$content = '--'. $boundary ."\r\n";
+				$content = '--' . $boundary ."\r\n";
 
 				// set file
-				$content .= 'Content-Disposition: form-data; name=file; filename="'. $fileInfo['basename'] .'"' ."\r\n";
+				$content .= 'Content-Disposition: form-data; name=file; filename="' . $fileInfo['basename'] . '"' ."\r\n";
 				$content .= 'Content-Type: application/octet-stream'."\r\n";
 				$content .= "\r\n";
 				$content .= file_get_contents($filePath);
 				$content .="\r\n";
-				$content .="--". $boundary .'--';
+				$content .="--". $boundary . '--';
 
 				// build headers
-				$headers[] = 'Content-Type: multipart/form-data; boundary='. $boundary;
-				$headers[] = 'Content-Length: '. strlen($content);
+				$headers[] = 'Content-Type: multipart/form-data; boundary=' . $boundary;
+				$headers[] = 'Content-Length: ' . strlen($content);
 
 				// set content
 				$options[CURLOPT_POSTFIELDS] = $content;
@@ -452,19 +452,19 @@ class Dropbox
 			unset($options[CURLOPT_POSTFIELDS]);
 
 			// add the parameters into the querystring
-			if(!empty($parameters)) $url .= '?'. $this->buildQuery($parameters);
+			if(!empty($parameters)) $url .= '?' . $this->buildQuery($parameters);
 		}
 
 		// add sign into the parameters
-		$oauth['oauth_signature'] = $this->hmacsha1($this->getApplicationSecret() .'&' . $this->getOAuthTokenSecret(), $base);
+		$oauth['oauth_signature'] = $this->hmacsha1($this->getApplicationSecret() . '&' . $this->getOAuthTokenSecret(), $base);
 
-		if($isContent) $headers[] = $this->calculateHeader($oauth, self::API_CONTENT_URL .'/'. $url);
-		else $headers[] = $this->calculateHeader($oauth, self::API_URL .'/'. $url);
+		if($isContent) $headers[] = $this->calculateHeader($oauth, self::API_CONTENT_URL . '/' . $url);
+		else $headers[] = $this->calculateHeader($oauth, self::API_URL . '/' . $url);
 		$headers[] = 'Expect:';
 
 		// set options
-		if($isContent) $options[CURLOPT_URL] = self::API_CONTENT_URL .'/'. $url;
-		else $options[CURLOPT_URL] = self::API_URL .'/'. $url;
+		if($isContent) $options[CURLOPT_URL] = self::API_CONTENT_URL . '/' . $url;
+		else $options[CURLOPT_URL] = self::API_URL . '/' . $url;
 		$options[CURLOPT_PORT] = self::API_PORT;
 		$options[CURLOPT_USERAGENT] = $this->getUserAgent();
 		if(ini_get('open_basedir') == '' && ini_get('safe_mode' == 'Off')) $options[CURLOPT_FOLLOWLOCATION] = true;
@@ -633,7 +633,7 @@ class Dropbox
 	 */
 	public function getUserAgent()
 	{
-		return (string) 'PHP Dropbox/'. self::VERSION .' '. $this->userAgent;
+		return (string) 'PHP Dropbox/' . self::VERSION . ' ' . $this->userAgent;
 	}
 
 
@@ -794,10 +794,10 @@ class Dropbox
 		if($oauthCallback !== null) $parameters['oauth_callback'] = (string) $oauthCallback;
 
 		// build url
-		$url = self::API_AUTH_URL .'/0/oauth/authorize?'. http_build_query($parameters);
+		$url = self::API_AUTH_URL . '/0/oauth/authorize?' . http_build_query($parameters);
 
 		// redirect
-		header('Location: '. $url);
+		header('Location: ' . $url);
 		exit;
 	}
 
