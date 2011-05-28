@@ -18,15 +18,15 @@ $dropbox->setOAuthTokenSecret(TOKEN_SECRET);
 //$response = $dropbox->account(time() . '-dropbox@verkoyen.eu', PASSWORD, 'Tijs', 'Verkoyen');
 //$response = $dropbox->accountInfo();
 
-//$response = $dropbox->filesGet(self::BASE_PATH .'hàh@, $.txt');
-//$response = $dropbox->filesPost(self::BASE_PATH .'', realpath('../dropbox.php'));
-//$response = $dropbox->metadata(self::BASE_PATH .'');
-//$response = $dropbox->thumbnails(self::BASE_PATH .'image.png');
+//$response = $dropbox->filesGet(BASE_PATH .'hàh@, $.txt');
+//$response = $dropbox->filesPost(BASE_PATH, realpath('../dropbox.php'));
+//$response = $dropbox->metadata(BASE_PATH);
+//$response = $dropbox->thumbnails(BASE_PATH .'image.png');
 
-//$response = $dropbox->fileopsCopy(self::BASE_PATH .'will_be_copied', self::BASE_PATH .'copy_'. time());
-//$response = $dropbox->fileopsCreateFolder(self::BASE_PATH .'created_'. time());
-//$response = $dropbox->fileopsDelete(self::BASE_PATH .'will_be_deleted');
-//$response = $dropbox->fileopsMove(self::BASE_PATH .'will_be_moved', self::BASE_PATH .'moved_'. time());
+$response = $dropbox->fileopsCopy(BASE_PATH . 'image.png', BASE_PATH . 'copy_' . time());
+//$response = $dropbox->fileopsCreateFolder(BASE_PATH .'created_'. time());
+//$response = $dropbox->fileopsDelete(BASE_PATH .'will_be_deleted');
+//$response = $dropbox->fileopsMove(BASE_PATH .'will_be_moved', BASE_PATH .'moved_'. time());
 
 // output (Spoon::dump())
 ob_start();
