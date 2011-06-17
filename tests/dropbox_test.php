@@ -114,9 +114,13 @@ class DropboxTest extends PHPUnit_Framework_TestCase
 	public function testFilesPost()
 	{
 		$this->assertTrue($this->dropbox->filesPost(BASE_PATH, realpath('/Users/tijs/Projects/dropbox/dropbox.php')));
+		$this->assertTrue($this->dropbox->filesPost(BASE_PATH, realpath('/Users/tijs/Projects/dropbox/tests/with spaces.txt')));
+		$this->assertTrue($this->dropbox->filesPost(BASE_PATH . 'with spaces', realpath('/Users/tijs/Projects/dropbox/tests/with spaces.txt')));
 
 		// cleanup
 		$this->dropbox->fileopsDelete(BASE_PATH . 'dropbox.php');
+		$this->dropbox->fileopsDelete(BASE_PATH . 'with spaces.txt');
+		$this->dropbox->fileopsDelete(BASE_PATH . 'with spaces/with spaces.txt');
 	}
 
 
