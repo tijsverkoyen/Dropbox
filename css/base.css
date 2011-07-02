@@ -1,10 +1,3 @@
-/*
-.folder, .file{list-style:none; position:relative}
-.folder:before, .file:before{position:absolute; top:0; left:-25px; content:"\002752"}
-.file:before{content:"\0027A0"}
-.elements{background:lightgrey; font-weight:bold; padding:1em 0.5em}*/
-
-
 ul, li{list-style:none; margin:0; padding:0; font:1em/1.4 Helvetica, Arial, sans;}
 li.folder{margin-top:10px; border-radius:5px; padding-top: 3px; text-indent:1em;}
 .pages li.folder{color: #e9e9e9; font-weight: bold;  background: #6e6e6e;}
@@ -18,13 +11,15 @@ li.folder{margin-top:10px; border-radius:5px; padding-top: 3px; text-indent:1em;
 .pages li a{color:#730800; text-decoration:none}
 .pages li a:hover{color:#000}
 .pages li:hover{background-color:#fffacd}
+.pages li:last-child{border-bottom:2px solid #ccc}
+.pages .pg li:last-child{border-bottom:none}
 .folder .pages li:last-child{border-bottom:1px solid #ccc; border-bottom-left-radius:5px; border-bottom-right-radius:5px}
-.pages  ul li{border:none}
-.pages  ul li:last-child{border:none}
+.pages .folder li.pg:last-child{border-bottom:2px solid #ccc}
 .actions{float:right;clear:both; margin-right:0.2em }
+.actions li{border:none}
 .actions li a{color:#000; font-weight:bold; font-size:12px; text-decoration:none; text-overflow: ellipsis;text-indent:0; width:250px}
 .actions li:hover{overflow:visible}
-.folder .actions li:hover a{text-indent:-40px; z-index:20; color:transparent; text-shadow:rgba(255,250,205,0.1) -15px -15px 3px, #111 -15px -15px 0, #fffacd -15px -15px 5px} 
+.pages .actions li:hover a{text-indent:-40px; z-index:20; color:rgba(255,255,255,0); text-shadow: #000 -25px -15px 0, #fffacd -25px -15px 10px} 
 .actions li{display: inline; float:left; width:25px; position:relative; margin:0 0 0.3em; z-index:1; overflow:hidden;}
 .pages .actions li, .pages .actions li:hover{background-color: transparent}
 
@@ -188,59 +183,6 @@ li a:active:before {
     background:#000;
 }
 
-
-
-
-/* FILE
----------------------------------------*/
-
-
-.file a:before {
-    left:5px;
-    width:8px;
-    height:10px;
-    border:2px solid #730800;
-    background:transparent;
-    -moz-border-radius-topleft:5px;
-    -webkit-border-top-left-radius:5px;
-    border-top-left-radius:5px;
-}
-
-.file a:after {
-    left:2px;
-    border-width:3.5px;
-    border-style:solid;
-    border-color:transparent #730800 #730800 transparent;
-    margin-top:-9px;
-    background:transparent;
-}
-.file:after {
-    left:8px;
-    width:6px;
-    height:1px;
-    margin-top:-2px;
-    border-top:2px double;
-    border-bottom: 2px double;
-    border-color:#730800;
-    background:transparent;
-}
- .file:hover:after,
-.file a:hover:before,
-.file a:focus:before,
-.file a:active:before {
-    border-color:#000;
-    background:transparent;
-}
-
-.file a:hover:after,
-.file a:focus:after,
-.file a:active:after {
-    border-color:transparent #000 #000 transparent;
-}
-
 .folder:before{content:"\0025BC \0000A0";font-weight:bold;color:#fff}
-
 .pg{text-indent:.5em}
 .pg:before{content:"\002261 \0000A0";font-weight:bold;}
-/*
-:before{content:"\0025BC"}*/
