@@ -18,3 +18,6 @@ More documentation can be found on [http://classes.verkoyen.eu/dropbox/docs](htt
 ## Sites using this class
 
 * [SumoCoders](http://www.sumocoders.be)
+
+## Example
+The couple of files show a liitle DropBoxmanager. You can preview a file or/and copy the file to your Webspace.
