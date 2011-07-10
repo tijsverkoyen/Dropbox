@@ -30,7 +30,7 @@ echo '<ul class="pages">';
 foreach(DBSort($root) as $v)
 {
   $path = $v['path'];
-  $pathfile = array_pop(explode('/', $path));
+  $pathfile = end(explode('/', $path));
   if($v['dir'] != '1')
   { 
 echo '<li class="pg">'.$pathfile."\n";
@@ -44,7 +44,7 @@ echo '</li>'."\n";
 	   echo '<ul>';
 	    foreach(DBSort($root."/".$pathfile) as $subpath)
       {
-	      $subpathfile = array_pop(explode('/', $subpath['path']));
+	      $subpathfile = end(explode('/', $subpath['path']));
         if($subpath['dir'] != '1')
         { 
 echo '<li class="pg">'.$subpathfile.'</li>'. "\n";
