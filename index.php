@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <title>Zugriff auf die Dropbox mit PHP</title>
-<link rel="stylesheet" type="text/css" href="css/base.css" />
+<link rel="stylesheet" type="text/css" href="css/base.css_" />
 </head>
 <h1>Dropboxmanager</h1>
 <?php
@@ -14,11 +14,15 @@ function DBSort($root)
 global $dropbox;
 $response = $dropbox->metadata($root);
 $count = count($response['contents']);
+$isf_dir = array();
   for($i = 0; $i < $count; $i++)
   {
     $sort_1[] = $response['contents'][$i]['is_dir'];
-    $isf_dir[$i]= array('path' => $response['contents'][$i]['path'],
-                    'dir' => $response['contents'][$i]['is_dir']);
+    $isf_dir[$i]= array();
+    $isf_dir[$i]['path'] = $response['contents'][$i]['path'];
+    if($response['contents'][$i]['is_dir']){
+        $isf_dir[$i]['dir'] = DBSort($response['contents'][$i]['path']);
+    }
    array_multisort($sort_1,SORT_DESC, $isf_dir);
   }
 return $isf_dir;
@@ -26,12 +30,16 @@ return $isf_dir;
 
 $root = 'public';
 
+
+print_r(DBSort($root));
+/*
 echo '<ul class="pages">';
 foreach(DBSort($root) as $v)
 {
   $path = $v['path'];
-  $pathfile = end(explode('/', $path));
-  if($v['dir'] != '1')
+  $explodedStuff = explode('/', $path);
+  $pathfile = end($explodedStuff);
+  if(!empty($v['dir']) && $v['dir'] != '1')
   { 
 echo '<li class="pg">'.$pathfile."\n";
 echo '<ul class="actions">'."\n";
@@ -44,7 +52,8 @@ echo '</li>'."\n";
 	   echo '<ul>';
 	    foreach(DBSort($root."/".$pathfile) as $subpath)
       {
-	      $subpathfile = end(explode('/', $subpath['path']));
+          $explodedStuff = explode('/', $subpath['path']);
+	      $subpathfile = end($explodedStuff);
         if($subpath['dir'] != '1')
         { 
 echo '<li class="pg">'.$subpathfile.'</li>'. "\n";
@@ -56,6 +65,8 @@ echo '</ul></li>'. "\n";
 	}
 }
 echo '</ul>';
+
+*/
 //var_dump($response);
 ?>
 </html>
