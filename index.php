@@ -1,9 +1,9 @@
 <!doctype html>
 <html lang="de">
 <head>
-  <meta charset="utf-8">
-  <title>Zugriff auf die Dropbox mit PHP</title>
-<link rel="stylesheet" type="text/css" href="css/base.css_" />
+<meta charset="utf-8">
+<title>Zugriff auf die Dropbox mit PHP</title>
+<link rel="stylesheet" type="text/css" href="css/base.css" />
 </head>
 <h1>Dropboxmanager</h1>
 <?php
@@ -28,45 +28,35 @@ $isf_dir = array();
 return $isf_dir;
 }
 
-$root = 'public';
+$root = 'iSefrengo_store';
+$dbMedia = DBSort($root);
+//print_r($dbMedia);
 
+function DBRender($dbSortArray){
+    $retval = "";
+    if(!empty($dbSortArray)){
+        $retval .= '<ul>'."\n";
+        foreach($dbSortArray as $arrayElement){
+            if(empty($arrayElement['dir'])){
+		$pathfile= end(explode("/", $arrayElement['path']));
+                $retval .= '<li class="pg">'.$pathfile."\n";
+                $retval .=  '<ul class="actions">'."\n";
+                $retval .= '<li class="previews"><a title="view" href="view.php?file='.x0rencrypt(ltrim($arrayElement['path'], '/'),$secretxorkey) .'">' .$pathfile. ' view</a></li>'."\n";
+                $retval .=  '<li class="edit"><a title="copy" href="copy.php?file='.x0rencrypt(ltrim($arrayElement['path'], '/'), $secretxorkey) .'">' .$pathfile. ' copy</a></li>'."\n";
+                $retval .=  '</ul>'."\n";
+                $retval .= '</li>'."\n";
 
-print_r(DBSort($root));
-/*
-echo '<ul class="pages">';
-foreach(DBSort($root) as $v)
-{
-  $path = $v['path'];
-  $explodedStuff = explode('/', $path);
-  $pathfile = end($explodedStuff);
-  if(!empty($v['dir']) && $v['dir'] != '1')
-  { 
-echo '<li class="pg">'.$pathfile."\n";
-echo '<ul class="actions">'."\n";
-echo '<li class="previews"><a title="view" href="view.php?file='.x0rencrypt(ltrim($path, '/'), $secretxorkey) .'">' .$pathfile. ' view</a></li>'."\n";
-echo '<li class="edit"><a title="copy" href="copy.php?file='.x0rencrypt(ltrim($path, '/'), $secretxorkey) .'">' .$pathfile. ' copy</a></li>'."\n";
-echo '</ul>'."\n";
-echo '</li>'."\n";
-   }else{
-     echo '<li class="folder">'.$pathfile. "\n";
-	   echo '<ul>';
-	    foreach(DBSort($root."/".$pathfile) as $subpath)
-      {
-          $explodedStuff = explode('/', $subpath['path']);
-	      $subpathfile = end($explodedStuff);
-        if($subpath['dir'] != '1')
-        { 
-echo '<li class="pg">'.$subpathfile.'</li>'. "\n";
-	      }else{
-echo '<li class="folder">'.$subpathfile.'</li>';
+}else{
+                $retval .= '<li class="folder">'.$arrayElement['path'];
+                $retval .= DBRender($arrayElement['dir']);
+                $retval .= '</li>'."\n";
+            }
         }
-      }
-echo '</ul></li>'. "\n";
-	}
+        $retval .= '</ul>'."\n";
+    }
+    return $retval;
 }
-echo '</ul>';
 
-*/
-//var_dump($response);
+echo DBRender($dbMedia);
 ?>
 </html>
