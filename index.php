@@ -9,6 +9,7 @@
 <?php
 include 'config.php'; //instance of $dropbox
 
+
 function DBSort($root)
 {
 global $dropbox;
@@ -30,24 +31,26 @@ return $isf_dir;
 
 $root = 'public';
 $dbMedia = DBSort($root);
-//print_r($dbMedia);
+
 
 function DBRender($dbSortArray){
+    global $secretxorkey;
     $retval = "";
     if(!empty($dbSortArray)){
         $retval .= '<ul>'."\n";
         foreach($dbSortArray as $arrayElement){
             if(empty($arrayElement['dir'])){
-		$pathfile= end(explode("/", $arrayElement['path']));
+		$path = $arrayElement['path'];
+		$pathfile = end(explode("/", $path));
                 $retval .= '<li class="pg">'.$pathfile."\n";
                 $retval .=  '<ul class="actions">'."\n";
-                $retval .= '<li class="previews"><a title="view" href="view.php?file='.x0rencrypt(ltrim($arrayElement['path'], '/'),$secretxorkey) .'">' .$pathfile. ' view</a></li>'."\n";
-                $retval .=  '<li class="edit"><a title="copy" href="copy.php?file='.x0rencrypt(ltrim($arrayElement['path'], '/'), $secretxorkey) .'">' .$pathfile. ' copy</a></li>'."\n";
+                $retval .= '<li class="previews"><a title="view" href="view.php?file='.x0rencrypt(ltrim($path, '/'), $secretxorkey).'">' .$pathfile. ' view</a></li>'."\n";
+                $retval .=  '<li class="edit"><a title="copy" href="copy.php?file='.x0rencrypt(ltrim($path, '/'), $secretxorkey) .'">' .$pathfile. ' copy</a></li>'."\n";
                 $retval .=  '</ul>'."\n";
                 $retval .= '</li>'."\n";
 
 }else{
-                $retval .= '<li class="folder">'.$arrayElement['path'];
+                $retval .= '<li class="folder">'.end(explode("/", $arrayElement['path']));
                 $retval .= DBRender($arrayElement['dir']);
                 $retval .= '</li>'."\n";
             }
