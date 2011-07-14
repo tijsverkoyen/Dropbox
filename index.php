@@ -28,7 +28,7 @@ $isf_dir = array();
 return $isf_dir;
 }
 
-$root = 'iSefrengo_store';
+$root = 'public';
 $dbMedia = DBSort($root);
 //print_r($dbMedia);
 
