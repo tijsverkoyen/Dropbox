@@ -60,6 +60,6 @@ function DBRender($dbSortArray){
     return $retval;
 }
 
-echo DBRender($dbMedia);
+echo preg_replace('/ul/', 'ul class="pages"', DBRender($dbMedia), 1);
 ?>
 </html>
