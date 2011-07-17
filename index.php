@@ -1,14 +1,13 @@
 <!doctype html>
 <html lang="de">
 <head>
-<meta charset="utf-8">
-<title>Zugriff auf die Dropbox mit PHP</title>
+  <meta charset="utf-8">
+  <title>Zugriff auf die Dropbox mit PHP</title>
 <link rel="stylesheet" type="text/css" href="css/base.css" />
 </head>
-<h1>Dropboxmanager</h1>
+<h1>Dropboxzugriff mit PHP</h1>
 <?php
 include 'config.php'; //instance of $dropbox
-
 
 function DBSort($root)
 {
@@ -45,7 +44,7 @@ function DBRender($dbSortArray){
                 $retval .= '<li class="pg">'.$pathfile."\n";
                 $retval .=  '<ul class="actions">'."\n";
                 $retval .= '<li class="previews"><a title="view" href="view.php?file='.x0rencrypt(ltrim($path, '/'), $secretxorkey).'">' .$pathfile. ' view</a></li>'."\n";
-                $retval .=  '<li class="edit"><a title="copy" href="copy.php?file='.x0rencrypt(ltrim($path, '/'), $secretxorkey) .'">' .$pathfile. ' copy</a></li>'."\n";
+                $retval .=  '<li class="clone"><a title="copy" href="copy.php?file='.x0rencrypt(ltrim($path, '/'), $secretxorkey) .'">' .$pathfile. ' copy</a></li>'."\n";
                 $retval .=  '</ul>'."\n";
                 $retval .= '</li>'."\n";
 
@@ -59,7 +58,9 @@ function DBRender($dbSortArray){
     }
     return $retval;
 }
-
+echo '<p class="elements">';
+echo 'Elemente im Ordner: '.$root; 
+echo '</p>';
 echo preg_replace('/ul/', 'ul class="pages"', DBRender($dbMedia), 1);
 ?>
 </html>
