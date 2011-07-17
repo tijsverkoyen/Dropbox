@@ -1,25 +1,25 @@
 ul, li{list-style:none; margin:0; padding:0; font:1em/1.4 Helvetica, Arial, sans;}
-li.folder{margin-top:10px; border-radius:5px; padding-top: 3px; text-indent:1em;}
-.pages li.folder{color: #e9e9e9; font-weight: bold;  background: #6e6e6e;}
-.pages li.folder:hover{ background: #6e6e6e;}
-
-.pages li.folder .folder, .pages li{ background-color:#fff; color:#000; border:1px solid #ccc; border-radius:0; border-bottom:none; margin:0}
+li.folder{margin-top:10px; border-radius:5px; padding-top: 3px; text-indent:1em}
+p.ok{border-radius:.3em}
+.pages{margin-top:1em}
+.pages li.folder{color: #fff; font-weight: bold;  background: #6e6e6e;}
+.pages li.folder .folder{background: #555; text-indent:2em}
+.pages li.folder .folder .folder{background:#444; text-indent:3em}
+.pages li.folder .folder .folder .folder{background:#333; text-indent:4em}
+.pages li.folder .folder .folder .folder .folder{background:#222; text-indent:5em}
+.pages li.folder .folder, .pages li{border:1px solid #ccc; border-radius:0; border-bottom:none; margin:0}
 .pages li {box-shadow: inset 0 -10px 2px rgba(136, 136, 136, 0.1);
  -o-box-shadow: inset 0 -10px 2px rgba(136, 136, 136, 0.1);
  -webkit-box-shadow: inset 0 -10px 2px rgba(136, 136, 136, 0.1);
  -moz-box-shadow: inset 0 -10px 2px rgba(136, 136, 136, 0.1);}
 .pages li a{color:#730800; text-decoration:none}
 .pages li a:hover{color:#000}
-.pages li:hover{background-color:#fffacd}
-.pages li:last-child{border-bottom:2px solid #ccc}
-.pages .pg li:last-child{border-bottom:none}
 .folder .pages li:last-child{border-bottom:1px solid #ccc; border-bottom-left-radius:5px; border-bottom-right-radius:5px}
-.pages .folder li.pg:last-child{border-bottom:2px solid #ccc}
-.actions{float:right;clear:both; margin-right:0.2em }
-.actions li{border:none}
+.pages  ul li{border:none}
+.actions{float:right;clear:both; margin-right:.5em; width:4em }
 .actions li a{color:#000; font-weight:bold; font-size:12px; text-decoration:none; text-overflow: ellipsis;text-indent:0; width:250px}
 .actions li:hover{overflow:visible}
-.pages .actions li:hover a{text-indent:-40px; z-index:20; color:rgba(255,255,255,0); text-shadow: #000 -25px -15px 0, #fffacd -25px -15px 10px} 
+.folder .actions li:hover a{text-indent:-40px; z-index:20; color:transparent; text-shadow:rgba(255,250,205,0.1) -15px -15px 3px, #111 -15px -15px 0, #fffacd -15px -15px 5px} 
 .actions li{display: inline; float:left; width:25px; position:relative; margin:0 0 0.3em; z-index:1; overflow:hidden;}
 .pages .actions li, .pages .actions li:hover{background-color: transparent}
 
@@ -68,82 +68,32 @@ li a:active:before {
 * -----------------------------------------------------------
 */
 
-/* EDIT
-------------------------------------------------------------------------------------------------------------------------------- */
+/* CLONE
+---------------------------------------*/
 
-.actions .edit a:before {
+.actions .clone a:before, 
+.actions .clone a:after {
+    width:12px;
+    height:8px;
+    border:1px solid #730800;
+    margin-top:-4px;
+    background:#fff;
+}
+ 
+.actions .clone a:after {
     left:3px;
-    width:5px;
-    height:5px;
-    margin-top:2px;
-    background:#730800;
-    -webkit-transform:skew(-10deg, -10deg);
-    -moz-transform:skew(-10deg, -10deg);
-    -o-transform:skew(-10deg, -10deg);
-    transform:skew(-10deg, -10deg);
-}
-
-.actions .edit a:after {
-    left:3px;
-    width:13px;
-    height:6px;
-    border-left:1px solid #fff;
-    margin-top:-3px;
-    /* css3 */
-    -webkit-transform:rotate(-45deg);
-    -moz-transform:rotate(-45deg);
-    -o-transform:rotate(-45deg);
-    transform:rotate(-45deg);
-}
-
-.edit a:hover:before,
-.edit a:focus:before,
-.edit a:active:before,
-.edit a:hover:after,
-.edit a:focus:after,
-.edit a:active:after {
-    background:#000;
-}
-
-
-/* DELETE
------------------------------------------ */
-
-.actions .delete a:before {
-    left:6px; 
-    width:5px; 
-    height:15px; 
     margin-top:-7px;
-    background:#730800;
-    /* css3 */
-    -webkit-transform:rotate(45deg);
-    -moz-transform:rotate(45deg);
-    -o-transform:rotate(45deg);
-    transform:rotate(45deg);
 }
 
-.actions .delete a:after {
-    left:1px; 
-    width:15px; 
-    height:5px; 
-    margin-top:-2px; 
-    background:#730800;
-    /* css3 */
-    -webkit-transform:rotate(45deg);
-    -moz-transform:rotate(45deg);
-    -o-transform:rotate(45deg);
-    transform:rotate(45deg);
+.clone a:hover:before, 
+.clone a:focus:before, 
+.clone a:active:before,
+ .clone a:hover:after, 
+ .clone a:focus:after, 
+ .clone a:active:after {
+    border-color:#000;
+    background:#fff;
 }
-
-.actions .delete a:hover:before, 
-.actions .delete a:focus:before, 
-.actions .delete a:active:before,
-.actions .delete a:hover:after, 
-.actions .delete a:focus:after, 
-.actions .delete a:active:after {
-    background:#000;
-}
-
 
 /* PREVIEWS
 ---------------------------------------*/
@@ -183,6 +133,18 @@ li a:active:before {
     background:#000;
 }
 
-.folder:before{content:"\0025BC \0000A0";font-weight:bold;color:#fff}
-.pg{text-indent:.5em}
+
+
+.folder:before{font-weight:bold;color:#fff}
+li.folder:before{content:"\0025BC \0000A0";}
+
+.pages li.pg{text-indent:.5em; background-color:#fff; color:#222;border-bottom:1px solid #ccc}
+.pages li.pg:hover{background-color:#fffacd}
+.pages li.folder .folder li.pg{text-indent:2em}
+.pages li.folder .folder .folder li.pg{text-indent:3em}
+.pages li.folder .folder .folder .folder li.pg{text-indent:4em}
+.pages li.folder .folder .folder .folder .folder li.pg{text-indent:5em}
 .pg:before{content:"\002261 \0000A0";font-weight:bold;}
+ul.pages>li.folder:first-child{border-radius:1em}
+ul.pages li.pg:last-child{border-bottom:2px solid #ccc}
+ul.pages>li.pg:last-child{border-radius:0 0 1em 1em}
