@@ -4,6 +4,8 @@
   <meta charset="utf-8">
   <title>Zugriff auf die Dropbox mit PHP</title>
 <link rel="stylesheet" type="text/css" href="css/base.css" />
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+<script type="text/javascript" src="js/base.js"></script>
 </head>
 <h1>Dropboxzugriff mit PHP</h1>
 <?php
@@ -28,7 +30,7 @@ $isf_dir = array();
 return $isf_dir;
 }
 
-$root = 'public';
+$root = 'iSefrengo_store/plugin_module/plugin_isef/DropBox';
 $dbMedia = DBSort($root);
 
 
