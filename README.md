@@ -1,10 +1,10 @@
-# Dropbox class
+# Dropbox filemanager
 
-> Dropbox is the easiest way to store, sync, and, share files online. There's no complicated interface to learn. Dropbox works seamlessly with your operating system and automatically makes sure your files are up-to-date. Available for Windows, Mac, and Linux.
+Register your App, get your token and choose your root-folder. Now you can view and copy your file to your webspace.
 
 ## About
 
-PHP Dropbox is a (wrapper)class to communicate with [Dropbox](http://dropbox.com).
+This couple of files use the PHP Dropbox a (wrapper)class to communicate with [Dropbox](http://dropbox.com).
 
 ## License
 
@@ -18,3 +18,4 @@ More documentation can be found on [http://classes.verkoyen.eu/dropbox/docs](htt
 ## Sites using this class
 
 * [SumoCoders](http://www.sumocoders.be)
+
