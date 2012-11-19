@@ -96,14 +96,62 @@ class DropboxTest extends PHPUnit_Framework_TestCase
 	 */
 	public function testFilesGet()
 	{
-		$this->dropbox->filesPost(BASE_PATH, realpath('./hàh@, $.txt'));
+		$response1 = $this->dropbox->filesPost(BASE_PATH, realpath(__DIR__ . '/hah@.txt'));
 
-		$response = $this->dropbox->filesGet(BASE_PATH . 'hàh@, $.txt');
+		$response = $this->dropbox->filesGet(BASE_PATH . "hah@.txt");
 
 		$this->assertArrayHasKey('content_type', $response);
 		$this->assertArrayHasKey('data', $response);
 
-		$this->dropbox->fileopsDelete(BASE_PATH . 'hàh@, $.txt');
+		$this->dropbox->fileopsDelete(BASE_PATH . 'hah@.txt');
+	}
+
+
+	/**
+	 * Tests Dropbox->filesGet()
+	 */
+	public function testFilesGetDollarSpace()
+	{
+		$response1 = $this->dropbox->filesPost(BASE_PATH, realpath(__DIR__ . '/hah $@.txt'));
+
+		$response = $this->dropbox->filesGet(BASE_PATH . "hah $@.txt");
+
+		$this->assertArrayHasKey('content_type', $response);
+		$this->assertArrayHasKey('data', $response);
+
+		$this->dropbox->fileopsDelete(BASE_PATH . 'hah $@.txt');
+	}
+
+
+	/**
+	 * Tests Dropbox->filesGet()
+	 */
+	public function testFilesGetComma()
+	{
+		$response1 = $this->dropbox->filesPost(BASE_PATH, realpath(__DIR__ . '/hah, $@.txt'));
+
+		$response = $this->dropbox->filesGet(BASE_PATH . "hah, $@.txt");
+
+		$this->assertArrayHasKey('content_type', $response);
+		$this->assertArrayHasKey('data', $response);
+
+		$this->dropbox->fileopsDelete(BASE_PATH . 'hah, $@.txt');
+	}
+
+
+	/**
+	 * Tests Dropbox->filesGet()
+	 */
+	public function testFilesGetMBName()
+	{
+		$this->dropbox->filesPost(BASE_PATH, realpath(__DIR__ . '/hàh@ $.txt'));
+
+		$response = $this->dropbox->filesGet(BASE_PATH . 'hàh@ $.txt');
+
+		$this->assertArrayHasKey('content_type', $response);
+		$this->assertArrayHasKey('data', $response);
+
+		$this->dropbox->fileopsDelete(BASE_PATH . 'hàh@ $.txt');
 	}
 
 
@@ -112,9 +160,9 @@ class DropboxTest extends PHPUnit_Framework_TestCase
 	 */
 	public function testFilesPost()
 	{
-		$this->assertTrue($this->dropbox->filesPost(BASE_PATH, realpath('../dropbox.php')));
-		$this->assertTrue($this->dropbox->filesPost(BASE_PATH, realpath('./with spaces.txt')));
-		$this->assertTrue($this->dropbox->filesPost(BASE_PATH . 'with spaces', realpath('./with spaces.txt')));
+		$this->assertTrue($this->dropbox->filesPost(BASE_PATH, realpath(__DIR__ . '/../dropbox.php')));
+		$this->assertTrue($this->dropbox->filesPost(BASE_PATH, realpath(__DIR__ . '/with spaces.txt')));
+		$this->assertTrue($this->dropbox->filesPost(BASE_PATH . 'with spaces', realpath(__DIR__ . '/with spaces.txt')));
 
 		// cleanup
 		$this->dropbox->fileopsDelete(BASE_PATH . 'dropbox.php');
@@ -130,6 +178,8 @@ class DropboxTest extends PHPUnit_Framework_TestCase
 	{
 		$response = $this->dropbox->metadata(BASE_PATH);
 
+		var_dump($response);
+
 		$this->assertArrayHasKey('hash', $response);
 		$this->assertArrayHasKey('revision', $response);
 		$this->assertArrayHasKey('modified', $response);
@@ -143,7 +193,7 @@ class DropboxTest extends PHPUnit_Framework_TestCase
 	 */
 	public function testThumbnails()
 	{
-		$this->dropbox->filesPost(BASE_PATH, realpath('./image.png'));
+		$this->dropbox->filesPost(BASE_PATH, realpath(__DIR__ . '/image.png'));
 
 		$response = $this->dropbox->thumbnails(BASE_PATH . 'image.png');
 
@@ -159,7 +209,7 @@ class DropboxTest extends PHPUnit_Framework_TestCase
 	 */
 	public function testFileopsCopy()
 	{
-		$this->dropbox->filesPost(BASE_PATH, realpath('./image.png'));
+		$this->dropbox->filesPost(BASE_PATH, realpath(__DIR__ . '/image.png'));
 
 		$response = $this->dropbox->fileopsCopy(BASE_PATH . 'image.png', BASE_PATH . 'copy.png');
 
@@ -206,5 +256,23 @@ class DropboxTest extends PHPUnit_Framework_TestCase
 		// cleanup
 		$this->dropbox->fileopsDelete(BASE_PATH . 'moved');
 	}
+
+
+	/**
+	 * Tests Dropbox->fileopsDelete()
+	 */
+	public function testDeleteAllFiles()
+	{
+		$response = $this->dropbox->metadata(BASE_PATH);
+
+		foreach($response['contents'] as $dbox_file) {
+			$response = $this->dropbox->fileopsDelete($dbox_file['path']);
+			print_r($response);
+			$this->assertArrayHasKey('is_deleted', $response);
+			$this->assertTrue($response['is_deleted']);
+		}
+
+	}
+
 }
 
