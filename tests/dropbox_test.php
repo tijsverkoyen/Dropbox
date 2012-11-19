@@ -267,7 +267,6 @@ class DropboxTest extends PHPUnit_Framework_TestCase
 
 		foreach($response['contents'] as $dbox_file) {
 			$response = $this->dropbox->fileopsDelete($dbox_file['path']);
-			print_r($response);
 			$this->assertArrayHasKey('is_deleted', $response);
 			$this->assertTrue($response['is_deleted']);
 		}
