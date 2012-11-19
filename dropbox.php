@@ -899,7 +899,7 @@ class Dropbox
 		$return = $this->doCall($url, null, 'POST', $localFile, true, true);
 
 		// return the result
-		return (bool) (isset($return['result']) && $return['result'] == 'winner!');
+		return (bool) (is_array($return) && isset($return['revision']));
 	}
 
 
