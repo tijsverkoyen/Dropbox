@@ -66,10 +66,14 @@ class DropboxTest extends PHPUnit_Framework_TestCase
 	 */
 	public function testOAuthRequestToken()
 	{
+		$this->dropbox->setOAuthToken(null);
+		$this->dropbox->setOAuthTokenSecret(null);
+
 		$response = $this->dropbox->oAuthRequestToken();
 
 		$this->assertArrayHasKey('oauth_token_secret', $response);
 		$this->assertArrayHasKey('oauth_token', $response);
+
 	}
 
 
@@ -92,10 +96,14 @@ class DropboxTest extends PHPUnit_Framework_TestCase
 	 */
 	public function testFilesGet()
 	{
+		$this->dropbox->filesPost(BASE_PATH, realpath('./hàh@, $.txt'));
+
 		$response = $this->dropbox->filesGet(BASE_PATH . 'hàh@, $.txt');
 
 		$this->assertArrayHasKey('content_type', $response);
 		$this->assertArrayHasKey('data', $response);
+
+		$this->dropbox->fileopsDelete(BASE_PATH . 'hàh@, $.txt');
 	}
 
 
@@ -135,10 +143,14 @@ class DropboxTest extends PHPUnit_Framework_TestCase
 	 */
 	public function testThumbnails()
 	{
+		$this->dropbox->filesPost(BASE_PATH, realpath('./image.png'));
+
 		$response = $this->dropbox->thumbnails(BASE_PATH . 'image.png');
 
 		$this->assertArrayHasKey('content_type', $response);
 		$this->assertArrayHasKey('data', $response);
+
+		$this->dropbox->fileopsDelete(BASE_PATH . 'image.png');
 	}
 
 
@@ -147,6 +159,8 @@ class DropboxTest extends PHPUnit_Framework_TestCase
 	 */
 	public function testFileopsCopy()
 	{
+		$this->dropbox->filesPost(BASE_PATH, realpath('./image.png'));
+
 		$response = $this->dropbox->fileopsCopy(BASE_PATH . 'image.png', BASE_PATH . 'copy.png');
 
 		$this->assertArrayHasKey('revision', $response);
@@ -154,6 +168,7 @@ class DropboxTest extends PHPUnit_Framework_TestCase
 		$this->assertArrayHasKey('path', $response);
 
 		// cleanup
+		$this->dropbox->fileopsDelete(BASE_PATH . 'image.png');
 		$this->dropbox->fileopsDelete(BASE_PATH . 'copy.png');
 	}
 
