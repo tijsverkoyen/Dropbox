@@ -74,15 +74,6 @@ class DropboxTest extends PHPUnit_Framework_TestCase
 
 
 	/**
-	 * Tests Dropbox->account()
-	 */
-	public function testAccount()
-	{
-		$this->assertTrue($this->dropbox->account(time() . '-dropbox@verkoyen.eu', PASSWORD, 'Tijs', 'Verkoyen'));
-	}
-
-
-	/**
 	 * Tests Dropbox->accountInfo()
 	 */
 	public function testAccountInfo()
