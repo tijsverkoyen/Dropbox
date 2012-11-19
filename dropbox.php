@@ -884,28 +884,6 @@ class Dropbox
 
 // account resources
 	/**
-	 * Given a set of account information, the account call allows an application to create a new Dropbox user account.
-	 * This is useful for situations where the trusted third party application is possibly the user's first interaction with Dropbox.
-	 *
-	 * @return	bool
-	 * @param	string $email		The email account of the user.
-	 * @param	string $password	The password for the user.
-	 * @param	string $firstName	The user's first name.
-	 * @param	string $lastName	The user's last name.
-	 */
-	public function account($email, $password, $firstName, $lastName)
-	{
-		// build parameters
-		$parameters['email'] = (string) $email;
-		$parameters['first_name'] = (string) $firstName;
-		$parameters['last_name'] = (string) $lastName;
-		$parameters['password'] = (string) $password;
-
-		return (bool) ($this->doCall(self::API_VERSION . '/account', $parameters, 'POST', null, false) == 'OK');
-	}
-
-
-	/**
 	 * Get the user account information.
 	 *
 	 * @return	array
