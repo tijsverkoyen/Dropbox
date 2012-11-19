@@ -8,6 +8,9 @@
  * The class is documented in the file itself. If you find any bugs help me out and report them. Reporting can be done by sending an email to php-dropbox-bugs[at]verkoyen[dot]eu.
  * If you report a bug, make sure you give me enough information (include your code).
  *
+ * Changelog since 1.0.6
+ * - update for Dropbox API v1.
+ *
  * Changelog since 1.0.5
  * - Fixed filesPost so it can handle folders with spaces.
  *
@@ -59,7 +62,7 @@ class Dropbox
 	const API_PORT = 443;
 
 	// current version
-	const VERSION = '1.0.6';
+	const VERSION = '1.0.7';
 
 
 	/**
