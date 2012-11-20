@@ -66,6 +66,9 @@ class DropboxTest extends PHPUnit_Framework_TestCase
 	 */
 	public function testOAuthRequestToken()
 	{
+		$this->dropbox->setOAuthToken(null);
+		$this->dropbox->setOAuthTokenSecret(null);
+
 		$response = $this->dropbox->oAuthRequestToken();
 
 		$this->assertArrayHasKey('oauth_token_secret', $response);
@@ -74,12 +77,33 @@ class DropboxTest extends PHPUnit_Framework_TestCase
 
 
 	/**
-	 * Tests Dropbox->account()
+	 * Tests Dropbox->oAuthAuthorizeURL()
 	 */
-	public function testAccount()
+	public function testGetAuthorizeURL()
 	{
-		$this->assertTrue($this->dropbox->account(time() . '-dropbox@verkoyen.eu', PASSWORD, 'Tijs', 'Verkoyen'));
+		$this->dropbox->setOAuthToken(null);
+		$this->dropbox->setOAuthTokenSecret(null);
+
+		$token_arr = $this->dropbox->oAuthRequestToken();
+
+		$base_url = Dropbox::API_AUTH_URL . '/' . Dropbox::API_VERSION .
+							'/oauth/authorize?';
+
+		// test with no callback
+		$params = array('oauth_token'=>$token_arr['oauth_token']);
+		$expect_url = $base_url . http_build_query($params);
+		$actual_url = $this->dropbox->oAuthAuthorizeURL($params['oauth_token']);
+		$this->assertEquals($expect_url, $actual_url);
+
+		// test with callback
+		$params['oauth_callback'] = "http://localhost/foo/bar/baz";
+		$expect_url = $base_url . http_build_query($params);
+		$actual_url = $this->dropbox->oAuthAuthorizeURL(
+		                              $params['oauth_token'],
+		                              $params['oauth_callback']);
+		$this->assertEquals($expect_url, $actual_url);
 	}
+
 
 
 	/**
@@ -101,10 +125,62 @@ class DropboxTest extends PHPUnit_Framework_TestCase
 	 */
 	public function testFilesGet()
 	{
-		$response = $this->dropbox->filesGet(BASE_PATH . 'hàh@, $.txt');
+		$response1 = $this->dropbox->filesPost(BASE_PATH, realpath(__DIR__ . '/hah@.txt'));
+
+		$response = $this->dropbox->filesGet(BASE_PATH . "hah@.txt");
 
 		$this->assertArrayHasKey('content_type', $response);
 		$this->assertArrayHasKey('data', $response);
+
+		$this->dropbox->fileopsDelete(BASE_PATH . 'hah@.txt');
+	}
+
+
+	/**
+	 * Tests Dropbox->filesGet()
+	 */
+	public function testFilesGetDollarSpace()
+	{
+		$response1 = $this->dropbox->filesPost(BASE_PATH, realpath(__DIR__ . '/hah $@.txt'));
+
+		$response = $this->dropbox->filesGet(BASE_PATH . "hah $@.txt");
+
+		$this->assertArrayHasKey('content_type', $response);
+		$this->assertArrayHasKey('data', $response);
+
+		$this->dropbox->fileopsDelete(BASE_PATH . 'hah $@.txt');
+	}
+
+
+	/**
+	 * Tests Dropbox->filesGet()
+	 */
+	public function testFilesGetComma()
+	{
+		$response1 = $this->dropbox->filesPost(BASE_PATH, realpath(__DIR__ . '/hah, $@.txt'));
+
+		$response = $this->dropbox->filesGet(BASE_PATH . "hah, $@.txt");
+
+		$this->assertArrayHasKey('content_type', $response);
+		$this->assertArrayHasKey('data', $response);
+
+		$this->dropbox->fileopsDelete(BASE_PATH . 'hah, $@.txt');
+	}
+
+
+	/**
+	 * Tests Dropbox->filesGet()
+	 */
+	public function testFilesGetMBName()
+	{
+		$this->dropbox->filesPost(BASE_PATH, realpath(__DIR__ . '/hàh@ $.txt'));
+
+		$response = $this->dropbox->filesGet(BASE_PATH . 'hàh@ $.txt');
+
+		$this->assertArrayHasKey('content_type', $response);
+		$this->assertArrayHasKey('data', $response);
+
+		$this->dropbox->fileopsDelete(BASE_PATH . 'hàh@ $.txt');
 	}
 
 
@@ -113,9 +189,9 @@ class DropboxTest extends PHPUnit_Framework_TestCase
 	 */
 	public function testFilesPost()
 	{
-		$this->assertTrue($this->dropbox->filesPost(BASE_PATH, realpath('/Users/tijs/Projects/dropbox/dropbox.php')));
-		$this->assertTrue($this->dropbox->filesPost(BASE_PATH, realpath('/Users/tijs/Projects/dropbox/tests/with spaces.txt')));
-		$this->assertTrue($this->dropbox->filesPost(BASE_PATH . 'with spaces', realpath('/Users/tijs/Projects/dropbox/tests/with spaces.txt')));
+		$this->assertTrue($this->dropbox->filesPost(BASE_PATH, realpath(__DIR__ . '/../dropbox.php')));
+		$this->assertTrue($this->dropbox->filesPost(BASE_PATH, realpath(__DIR__ . '/with spaces.txt')));
+		$this->assertTrue($this->dropbox->filesPost(BASE_PATH . 'with spaces', realpath(__DIR__ . '/with spaces.txt')));
 
 		// cleanup
 		$this->dropbox->fileopsDelete(BASE_PATH . 'dropbox.php');
@@ -144,10 +220,14 @@ class DropboxTest extends PHPUnit_Framework_TestCase
 	 */
 	public function testThumbnails()
 	{
+		$this->dropbox->filesPost(BASE_PATH, realpath(__DIR__ . '/image.png'));
+
 		$response = $this->dropbox->thumbnails(BASE_PATH . 'image.png');
 
 		$this->assertArrayHasKey('content_type', $response);
 		$this->assertArrayHasKey('data', $response);
+
+		$this->dropbox->fileopsDelete(BASE_PATH . 'image.png');
 	}
 
 
@@ -156,6 +236,8 @@ class DropboxTest extends PHPUnit_Framework_TestCase
 	 */
 	public function testFileopsCopy()
 	{
+		$this->dropbox->filesPost(BASE_PATH, realpath(__DIR__ . '/image.png'));
+
 		$response = $this->dropbox->fileopsCopy(BASE_PATH . 'image.png', BASE_PATH . 'copy.png');
 
 		$this->assertArrayHasKey('revision', $response);
@@ -163,6 +245,7 @@ class DropboxTest extends PHPUnit_Framework_TestCase
 		$this->assertArrayHasKey('path', $response);
 
 		// cleanup
+		$this->dropbox->fileopsDelete(BASE_PATH . 'image.png');
 		$this->dropbox->fileopsDelete(BASE_PATH . 'copy.png');
 	}
 
@@ -200,5 +283,22 @@ class DropboxTest extends PHPUnit_Framework_TestCase
 		// cleanup
 		$this->dropbox->fileopsDelete(BASE_PATH . 'moved');
 	}
+
+
+	/**
+	 * Tests Dropbox->fileopsDelete()
+	 */
+	public function testDeleteAllFiles()
+	{
+		$response = $this->dropbox->metadata(BASE_PATH);
+
+		foreach($response['contents'] as $dbox_file) {
+			$response = $this->dropbox->fileopsDelete($dbox_file['path']);
+			$this->assertArrayHasKey('is_deleted', $response);
+			$this->assertTrue($response['is_deleted']);
+		}
+
+	}
+
 }
 

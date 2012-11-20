@@ -8,6 +8,12 @@
  * The class is documented in the file itself. If you find any bugs help me out and report them. Reporting can be done by sending an email to php-dropbox-bugs[at]verkoyen[dot]eu.
  * If you report a bug, make sure you give me enough information (include your code).
  *
+ * Changelog since 1.0.7
+ * - implement Dropbox::oAuthAuthorizeURL() tro retrieve authorize url w/o redirect
+ *
+ * Changelog since 1.0.6
+ * - update for Dropbox API v1.
+ *
  * Changelog since 1.0.5
  * - Fixed filesPost so it can handle folders with spaces.
  *
@@ -53,12 +59,13 @@ class Dropbox
 	const API_URL = 'https://api.dropbox.com';
 	const API_AUTH_URL = 'https://www.dropbox.com';
 	const API_CONTENT_URL = 'https://api-content.dropbox.com';
+	const API_VERSION = '1';
 
 	// port for the dropbox-api
 	const API_PORT = 443;
 
 	// current version
-	const VERSION = '1.0.6';
+	const VERSION = '1.0.8';
 
 
 	/**
@@ -762,7 +769,7 @@ class Dropbox
 	public function oAuthRequestToken()
 	{
 		// make the call
-		$response = $this->doOAuthCall('0/oauth/request_token', null, 'POST', false);
+		$response = $this->doOAuthCall(self::API_VERSION . '/oauth/request_token', null, 'POST', false);
 
 		// process response
 		$response = (array) explode('&', $response);
@@ -797,17 +804,29 @@ class Dropbox
 	 */
 	public function oAuthAuthorize($oauthToken, $oauthCallback = null)
 	{
+		$url = $this->oAuthAuthorizeURL($oauthToken, $oauthCallback);
+		// redirect
+		header('Location: ' . $url);
+		exit;
+	}
+
+	/**
+	 * returns the oauth/authorize URL the user needs to navigate to.
+	 *
+	 * @param  string $oauthToken    The request token of the application requesting authority from a user.
+	 * @param  string[optional]      $oauthCallback		After the user authorizes an application, the user is redirected to the application-served URL provided by this parameter.
+	 * @return string                the authorize URL
+	 */
+	public function oAuthAuthorizeURL($oauthToken, $oauthCallback = null)
+	{
 		// build parameters
 		$parameters = array();
 		$parameters['oauth_token'] = (string) $oauthToken;
 		if($oauthCallback !== null) $parameters['oauth_callback'] = (string) $oauthCallback;
 
 		// build url
-		$url = self::API_AUTH_URL . '/0/oauth/authorize?' . http_build_query($parameters);
-
-		// redirect
-		header('Location: ' . $url);
-		exit;
+		$url = self::API_AUTH_URL . '/' . self::API_VERSION . '/oauth/authorize?' . http_build_query($parameters);
+		return $url;
 	}
 
 
@@ -825,7 +844,7 @@ class Dropbox
 		$parameters['oauth_token'] = (string) $oauthToken;
 
 		// make the call
-		$response = $this->doOAuthCall('0/oauth/access_token', $parameters, 'POST', false);
+		$response = $this->doOAuthCall(self::API_VERSION . '/oauth/access_token', $parameters, 'POST', false);
 
 		// process response
 		$response = (array) explode('&', $response);
@@ -846,64 +865,7 @@ class Dropbox
 	}
 
 
-// token resources
-	/**
-	 * The token call provides a consumer/secret key pair you can use to consistently access the user's account.
-	 * This is the preferred method of authentication over storing the username and password.
-	 * Use the key pair as a signature with every subsequent call.
-	 * The request must be signed using the application's developer and secret key token. Request or access tokens are necessary.
-	 *
-	 * Warning: DO NOT STORE THE USER'S PASSWORD! The way this call works is you call it once with the user's email and password and then
-	 * keep the token around for later. You do NOT (I repeat NOT) call this before everything you do or on each program startup.
-	 * We watch for this and will shut down your application with little notice if we catch you.
-	 * In fact, the Objective-C code does this for you so you can't get it wrong.
-	 *
-	 * @return	array				Upon successful verification of the user's credentials, returns an array representation of the access token and secret.
-	 * @param	string $email		The email account of the user.
-	 * @param	string $password	The password of the user.
-	 */
-	public function token($email, $password)
-	{
-		// build parameters
-		$parameters = array();
-		$parameters['email'] = (string) $email;
-		$parameters['password'] = (string) $password;
-
-		// make the call
-		$response = (array) $this->doOAuthCall('0/token', $parameters);
-
-		// validate and set
-		if(isset($response['token'])) $this->setOAuthToken($response['token']);
-		if(isset($response['secret'])) $this->setOAuthTokenSecret($response['secret']);
-
-		// return
-		return $response;
-	}
-
-
 // account resources
-	/**
-	 * Given a set of account information, the account call allows an application to create a new Dropbox user account.
-	 * This is useful for situations where the trusted third party application is possibly the user's first interaction with Dropbox.
-	 *
-	 * @return	bool
-	 * @param	string $email		The email account of the user.
-	 * @param	string $password	The password for the user.
-	 * @param	string $firstName	The user's first name.
-	 * @param	string $lastName	The user's last name.
-	 */
-	public function account($email, $password, $firstName, $lastName)
-	{
-		// build parameters
-		$parameters['email'] = (string) $email;
-		$parameters['first_name'] = (string) $firstName;
-		$parameters['last_name'] = (string) $lastName;
-		$parameters['password'] = (string) $password;
-
-		return (bool) ($this->doCall('0/account', $parameters, 'POST', null, false) == 'OK');
-	}
-
-
 	/**
 	 * Get the user account information.
 	 *
@@ -912,7 +874,7 @@ class Dropbox
 	public function accountInfo()
 	{
 		// make the call
-		return (array) $this->doCall('0/account/info');
+		return (array) $this->doCall(self::API_VERSION . '/account/info');
 	}
 
 
@@ -927,7 +889,7 @@ class Dropbox
 	public function filesGet($path, $sandbox = false)
 	{
 		// build url
-		$url = '0/files/';
+		$url = self::API_VERSION . '/files/';
 		$url .= ($sandbox) ? 'sandbox/' : 'dropbox/';
 		$url .= trim((string) $path, '/');
 
@@ -947,7 +909,7 @@ class Dropbox
 	public function filesPost($path, $localFile, $sandbox = false)
 	{
 		// build url
-		$url = '0/files/';
+		$url = self::API_VERSION . '/files/';
 		$url .= ($sandbox) ? 'sandbox/' : 'dropbox/';
 		$url .= str_replace(' ', '%20', trim((string) $path, '/'));
 
@@ -955,7 +917,7 @@ class Dropbox
 		$return = $this->doCall($url, null, 'POST', $localFile, true, true);
 
 		// return the result
-		return (bool) (isset($return['result']) && $return['result'] == 'winner!');
+		return (bool) (is_array($return) && isset($return['revision']));
 	}
 
 
@@ -974,7 +936,7 @@ class Dropbox
 	public function metadata($path = '', $fileLimit = 10000, $hash = false, $list = true, $sandbox = false)
 	{
 		// build url
-		$url = '0/metadata/';
+		$url = self::API_VERSION . '/metadata/';
 		$url .= ($sandbox) ? 'sandbox/' : 'dropbox/';
 		$url .= trim((string) $path, '/');
 
@@ -999,7 +961,7 @@ class Dropbox
 	public function thumbnails($path, $size = 'small')
 	{
 		// build url
-		$url = '0/thumbnails/dropbox/';
+		$url = self::API_VERSION . '/thumbnails/dropbox/';
 		$url .= trim((string) $path, '/');
 
 		// build parameters
@@ -1022,7 +984,7 @@ class Dropbox
 	public function fileopsCopy($fromPath, $toPath, $sandbox = false)
 	{
 		// build url
-		$url = '0/fileops/copy';
+		$url = self::API_VERSION . '/fileops/copy';
 
 		// build parameters
 		$parameters['from_path'] = (string) $fromPath;
@@ -1044,7 +1006,7 @@ class Dropbox
 	public function fileopsCreateFolder($path, $sandbox = false)
 	{
 		// build url
-		$url = '0/fileops/create_folder';
+		$url = self::API_VERSION . '/fileops/create_folder';
 
 		// build parameters
 		$parameters['path'] = trim((string) $path, '/');
@@ -1065,7 +1027,7 @@ class Dropbox
 	public function fileopsDelete($path, $sandbox = false)
 	{
 		// build url
-		$url = '0/fileops/delete';
+		$url = self::API_VERSION . '/fileops/delete';
 
 		// build parameters
 		$parameters['path'] = trim((string) $path, '/');
@@ -1087,7 +1049,7 @@ class Dropbox
 	public function fileopsMove($fromPath, $toPath, $sandbox = false)
 	{
 		// build url
-		$url = '0/fileops/move';
+		$url = self::API_VERSION . '/fileops/move';
 
 		// build parameters
 		$parameters['from_path'] = (string) $fromPath;
