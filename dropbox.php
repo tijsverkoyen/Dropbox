@@ -8,6 +8,9 @@
  * The class is documented in the file itself. If you find any bugs help me out and report them. Reporting can be done by sending an email to php-dropbox-bugs[at]verkoyen[dot]eu.
  * If you report a bug, make sure you give me enough information (include your code).
  *
+ * Changelog since 1.0.7
+ * - implement Dropbox::oAuthAuthorizeURL() tro retrieve authorize url w/o redirect
+ *
  * Changelog since 1.0.6
  * - update for Dropbox API v1.
  *
@@ -62,7 +65,7 @@ class Dropbox
 	const API_PORT = 443;
 
 	// current version
-	const VERSION = '1.0.7';
+	const VERSION = '1.0.8';
 
 
 	/**
@@ -801,6 +804,21 @@ class Dropbox
 	 */
 	public function oAuthAuthorize($oauthToken, $oauthCallback = null)
 	{
+		$url = $this->oAuthAuthorizeURL($oauthToken, $oauthCallback);
+		// redirect
+		header('Location: ' . $url);
+		exit;
+	}
+
+	/**
+	 * returns the oauth/authorize URL the user needs to navigate to.
+	 *
+	 * @param  string $oauthToken    The request token of the application requesting authority from a user.
+	 * @param  string[optional]      $oauthCallback		After the user authorizes an application, the user is redirected to the application-served URL provided by this parameter.
+	 * @return string                the authorize URL
+	 */
+	public function oAuthAuthorizeURL($oauthToken, $oauthCallback = null)
+	{
 		// build parameters
 		$parameters = array();
 		$parameters['oauth_token'] = (string) $oauthToken;
@@ -808,10 +826,7 @@ class Dropbox
 
 		// build url
 		$url = self::API_AUTH_URL . '/' . self::API_VERSION . '/oauth/authorize?' . http_build_query($parameters);
-
-		// redirect
-		header('Location: ' . $url);
-		exit;
+		return $url;
 	}
 
 

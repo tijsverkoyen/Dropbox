@@ -73,8 +73,37 @@ class DropboxTest extends PHPUnit_Framework_TestCase
 
 		$this->assertArrayHasKey('oauth_token_secret', $response);
 		$this->assertArrayHasKey('oauth_token', $response);
-
 	}
+
+
+	/**
+	 * Tests Dropbox->oAuthAuthorizeURL()
+	 */
+	public function testGetAuthorizeURL()
+	{
+		$this->dropbox->setOAuthToken(null);
+		$this->dropbox->setOAuthTokenSecret(null);
+
+		$token_arr = $this->dropbox->oAuthRequestToken();
+
+		$base_url = Dropbox::API_AUTH_URL . '/' . Dropbox::API_VERSION .
+							'/oauth/authorize?';
+
+		// test with no callback
+		$params = array('oauth_token'=>$token_arr['oauth_token']);
+		$expect_url = $base_url . http_build_query($params);
+		$actual_url = $this->dropbox->oAuthAuthorizeURL($params['oauth_token']);
+		$this->assertEquals($expect_url, $actual_url);
+
+		// test with callback
+		$params['oauth_callback'] = "http://localhost/foo/bar/baz";
+		$expect_url = $base_url . http_build_query($params);
+		$actual_url = $this->dropbox->oAuthAuthorizeURL(
+		                              $params['oauth_token'],
+		                              $params['oauth_callback']);
+		$this->assertEquals($expect_url, $actual_url);
+	}
+
 
 
 	/**
