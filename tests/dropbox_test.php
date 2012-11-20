@@ -178,8 +178,6 @@ class DropboxTest extends PHPUnit_Framework_TestCase
 	{
 		$response = $this->dropbox->metadata(BASE_PATH);
 
-		var_dump($response);
-
 		$this->assertArrayHasKey('hash', $response);
 		$this->assertArrayHasKey('revision', $response);
 		$this->assertArrayHasKey('modified', $response);
