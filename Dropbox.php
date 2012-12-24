@@ -282,7 +282,7 @@ class Dropbox
         $data = $oauth;
         if(!empty($parameters)) $data = array_merge($data, $parameters);
 
-         if ($filePath != null) {
+        if ($filePath != null) {
             // process file
             $fileInfo = pathinfo($filePath);
 
@@ -728,10 +728,7 @@ class Dropbox
         if($locale !== null) $parameters['locale'] = (string) $locale;
 
         // make the call
-        $return = $this->doCall($url, $parameters, 'POST', $localFile, true, true);
-
-        // return the result
-        return (bool) (isset($return['result']) && $return['result'] == 'winner!');
+        return $this->doCall($url, $parameters, 'POST', $localFile, true, true);
     }
 
     /**
