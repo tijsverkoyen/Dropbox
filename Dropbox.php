@@ -818,10 +818,10 @@ class Dropbox
     /**
      * Create a folder relative to the user's Dropbox root or the user's application sandbox folder.
      *
-     * @return array
      * @param  string           $path    The path to the new folder to create relative to root.
      * @param  string[optional] $locale  The metadata returned will have its size field translated based on the given locale.
      * @param  bool[optional]   $sandbox The metadata returned will have its size field translated based on the given locale.
+     * @return array
      */
     public function fileopsCreateFolder($path, $locale = null, $sandbox = false)
     {
@@ -840,18 +840,20 @@ class Dropbox
     /**
      * Deletes a file or folder.
      *
+     * @param  string           $path    The path to the file or folder to be deleted.
+     * @param  string[optional] $locale  The metadata returned will have its size field translated based on the given locale.
+     * @param  bool[optional]   $sandbox The metadata returned will have its size field translated based on the given locale.
      * @return array
-     * @param $path string specifies either a file or folder to be deleted. This path is interpreted relative to the location specified by root.
-     * @param $sandbox bool[optional] mode?
      */
-    public function fileopsDelete($path, $sandbox = false)
+    public function fileopsDelete($path, $locale = null, $sandbox = false)
     {
         // build url
-        $url = '0/fileops/delete';
+        $url = '1/fileops/delete';
 
         // build parameters
         $parameters['path'] = trim((string) $path, '/');
         $parameters['root'] = ($sandbox) ? 'sandbox' : 'dropbox';
+        if($locale !== null) $parameters['locale'] = (string) $locale;
 
         // make the call
         return $this->doCall($url, $parameters, 'POST');

@@ -37,7 +37,7 @@ try {
 //
 //  $response = $dropbox->fileopsCopy(BASE_PATH . 'image.png', BASE_PATH . 'copy_' . time());
 //  $response = $dropbox->fileopsCreateFolder(BASE_PATH .'created_'. time());
-//	@todo response = $dropbox->fileopsDelete(BASE_PATH .'will_be_deleted');
+//  $response = $dropbox->fileopsDelete(BASE_PATH .'will_be_deleted');
 //	@todo response = $dropbox->fileopsMove(BASE_PATH .'will_be_moved', BASE_PATH .'moved_'. time());
 } catch (Exception $e) {
   var_dump($e);
