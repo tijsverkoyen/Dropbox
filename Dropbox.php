@@ -688,7 +688,7 @@ class Dropbox
 
     // account resources
     /**
-     * Get the user account information.
+     * Retrieves information about the user's account.
      *
      * @return array
      */
@@ -719,7 +719,7 @@ class Dropbox
     }
 
     /**
-     * Uploads file contents relative to the user's Dropbox root or the application's directory within the user's Dropbox.
+     * Uploads a file.
      *
      * @return bool
      * @param $path string of the directory wherin the file should be uploaded.
@@ -729,7 +729,7 @@ class Dropbox
     public function filesPost($path, $localFile, $sandbox = false)
     {
         // build url
-        $url = '0/files/';
+        $url = '1/files/';
         $url .= ($sandbox) ? 'sandbox/' : 'dropbox/';
         $url .= str_replace(' ', '%20', trim((string) $path, '/'));
 
@@ -741,10 +741,7 @@ class Dropbox
     }
 
     /**
-     * Returns metadata for the file or directory at the given <path> location relative to the user's Dropbox or
-     * the user's application sandbox.
-     * If <path> represents a directory and the list parameter is true, the metadata will
-     * also include a listing of metadata for the directory's contents.
+     * Retrieves file and folder metadata.
      *
      * @param  string[optional] $path           The path to the file or folder.
      * @param  int[optional]    $fileLimit      Default is 10,000 (max is 25,000). When listing a folder, the service will not report listings containing more than the specified amount of files and will instead respond with a 406 (Not Acceptable) status response.
@@ -776,7 +773,7 @@ class Dropbox
     }
 
     /**
-     * Get a minimized thumbnail for a photo.
+     * Gets a thumbnail for an image.
      *
      * @param  string[optional] $path    The path to the file or folder.
      * @param  string[optional] $size    Possible values are: 'xs' (32x32), 's' (64x64), 'm' (128x128), 'l' (640x480), 'xl' (1024x768).
