@@ -80,8 +80,8 @@ class Dropbox
     /**
      * Default constructor
      *
-     * @param $applicationKey string application key to use.
-     * @param $applicationSecret string application secret to use.
+     * @param string $applicationKey    The application key to use.
+     * @param string $applicationSecret The application secret to use.
      */
     public function __construct($applicationKey, $applicationSecret)
     {
@@ -100,7 +100,7 @@ class Dropbox
     /**
      * Format the parameters as a querystring
      *
-     * @param $parameters array parameters to pass.
+     * @param  array  $parameters The parameters to pass.
      * @return string
      */
     private function buildQuery(array $parameters)
@@ -137,7 +137,6 @@ class Dropbox
 
     /**
      * Build the Authorization header
-     * @later: fix me
      *
      * @param  array  $parameters The parameters.
      * @param  string $url        The URL.
@@ -145,17 +144,19 @@ class Dropbox
      */
     private function calculateHeader(array $parameters, $url)
     {
-        // redefine
-        $url = (string) $url;
-
         // divide into parts
-        $parts = parse_url($url);
+        $parts = parse_url((string) $url);
 
         // init var
         $chunks = array();
 
         // process queries
-        foreach($parameters as $key => $value) $chunks[] = str_replace('%25', '%', self::urlencode_rfc3986($key) . '="' . self::urlencode_rfc3986($value) . '"');
+        foreach ($parameters as $key => $value) {
+            $chunks[] = str_replace(
+                '%25', '%',
+                self::urlencode_rfc3986($key) . '="' . self::urlencode_rfc3986($value) . '"'
+            );
+        }
 
         // build return
         $return = 'Authorization: OAuth realm="", ';
@@ -167,14 +168,12 @@ class Dropbox
 
     /**
      * Make an call to the oAuth
-     * @todo	refactor me
      *
-     * @todo refactor me
-     * @return array
-     * @param $url string url that has to be called.
-     * @param $parameters array[optional] parameters to pass.
-     * @param $method string[optional] HTTP-method should we use? Possible values are POST, GET.
-     * @param $expectJSON bool[optional] we expect JSON?
+     * @param  string           $url        The url that has to be called.
+     * @param  array[optional]  $parameters The parameters to pass.
+     * @param  string[optional] $method     The HTTP-method should we use? Possible values are POST, GET.
+     * @param  bool[optional]   $expectJSON Do we expect JSON?
+     * @return mixed
      */
     private function doOAuthCall($url, array $parameters = null, $method = 'POST', $expectJSON = true)
     {
@@ -240,12 +239,12 @@ class Dropbox
      * Make the call
      *
      * @return string
-     * @param $url string url to call.
-     * @param $parameters array[optional] parameters.
-     * @param $method bool[optional] method to use. Possible values are GET, POST.
-     * @param $filePath string[optional] path to the file to upload.
-     * @param $expectJSON bool[optional] we expect JSON?
-     * @param $isContent bool[optional] this content?
+     * @param  string           $url        The url to call.
+     * @param  array[optional]  $parameters The parameters.
+     * @param  string[optional] $method     The method to use. Possible values are GET, POST.
+     * @param string[optional]$filePath		The path to the file to upload.
+     * @param bool[optional]$expectJSON		Do we expect JSON?
+     * @param bool[optional]$isContent		Do we expect raw content?
      */
     private function doCall($url, array $parameters = null, $method = 'GET', $filePath = null, $expectJSON = true, $isContent = false)
     {
@@ -507,7 +506,7 @@ class Dropbox
     /**
      * Set the application key
      *
-     * @param $key string application key to use.
+     * @param string $key The application key to use.
      */
     private function setApplicationKey($key)
     {
@@ -517,7 +516,7 @@ class Dropbox
     /**
      * Set the application secret
      *
-     * @param $secret string application secret to use.
+     * @param string $secret The application secret to use.
      */
     private function setApplicationSecret($secret)
     {
@@ -527,7 +526,7 @@ class Dropbox
     /**
      * Set the oAuth-token
      *
-     * @param $token string token to use.
+     * @param string $token The token to use.
      */
     public function setOAuthToken($token)
     {
@@ -537,7 +536,7 @@ class Dropbox
     /**
      * Set the oAuth-secret
      *
-     * @param $secret string secret to use.
+     * @param string $secret The secret to use.
      */
     public function setOAuthTokenSecret($secret)
     {
@@ -547,7 +546,7 @@ class Dropbox
     /**
      * Set the timeout
      *
-     * @param $seconds int timeout in seconds.
+     * @param int $seconds The timeout in seconds.
      */
     public function setTimeOut($seconds)
     {
@@ -559,7 +558,7 @@ class Dropbox
      * Our version will be prepended to yours.
      * It will look like: "PHP Dropbox/<version> <your-user-agent>"
      *
-     * @param $userAgent string user-agent, it should look like <app-name>/<app-version>.
+     * @param string $userAgent The user-agent, it should look like <app-name>/<app-version>.
      */
     public function setUserAgent($userAgent)
     {
@@ -567,22 +566,10 @@ class Dropbox
     }
 
     /**
-     * Build the signature for the data
+     * URL-encode method for internal use
      *
+     * @param  mixed  $value The value to encode.
      * @return string
-     * @param $key string key to use for signing.
-     * @param $data string data that has to be signed.
-     */
-    private function hmacsha1($key, $data)
-    {
-        return base64_encode(hash_hmac('sha1', $data, $key, true));
-    }
-
-    /**
-     * URL-encode method for internatl use
-     *
-     * @return string
-     * @param $value mixed value to encode.
      */
     private static function urlencode_rfc3986($value)
     {
@@ -651,8 +638,8 @@ class Dropbox
      * Step 3 of authentication. After the /oauth/authorize step is complete, the application can call /oauth/access_token to acquire an access token.
      * This method corresponds to Obtaining an Access Token in the OAuth Core 1.0 specification.
      *
+     * @param  string $oauthToken The token returned after authorizing.
      * @return array
-     * @param $oauthToken string token returned after authorizing.
      */
     public function oAuthAccessToken($oauthToken)
     {
@@ -721,20 +708,27 @@ class Dropbox
     /**
      * Uploads a file.
      *
-     * @return bool
-     * @param $path string of the directory wherin the file should be uploaded.
-     * @param $localFile string to the local file.
-     * @param $sandbox bool[optional] mode?
+     * @param  string           $path      The path to the folder the file should be uploaded to. This parameter should not point to a file.
+     * @param  string           $localFile The path to the local file.
+     * @param  bool[optional]   $overwrite This value, either true (default) or false, determines what happens when there's already a file at the specified path. If true, the existing file will be overwritten by the new one. If false, the new file will be automatically renamed (for example, test.txt might be automatically renamed to test (1).txt). The new name can be obtained from the returned metadata.
+     * @param  string[optional] $parentRev The revision of the file you're editing. If parent_rev matches the latest version of the file on the user's Dropbox, that file will be replaced. Otherwise, the new file will be automatically renamed (for example, test.txt might be automatically renamed to test (conflicted copy).txt). If you specify a revision that doesn't exist, the file will not save (error 400).
+     * @param  bool[optional]   $sandbox   The root relative to which path is specified. Valid values are sandbox and dropbox.
+     * @return array
      */
-    public function filesPost($path, $localFile, $sandbox = false)
+    public function filesPost($path, $localFile, $overwrite = null, $parentRev = null, $locale = null, $sandbox = false)
     {
         // build url
         $url = '1/files/';
         $url .= ($sandbox) ? 'sandbox/' : 'dropbox/';
         $url .= str_replace(' ', '%20', trim((string) $path, '/'));
 
+        $parameters = array();
+        if($overwrite !== null) $parameters['overwrite'] = ((bool) $overwrite) ? 'true' : 'false';
+        if($parentRev !== null) $parameters['parent_rev'] = (string) $parentRev;
+        if($locale !== null) $parameters['locale'] = (string) $locale;
+
         // make the call
-        $return = $this->doCall($url, null, 'POST', $localFile, true, true);
+        $return = $this->doCall($url, $parameters, 'POST', $localFile, true, true);
 
         // return the result
         return (bool) (isset($return['result']) && $return['result'] == 'winner!');
