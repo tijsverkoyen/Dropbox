@@ -762,61 +762,7 @@ class Dropbox
         return $return;
     }
 
-    // token resources
-    /**
-     * The token call provides a consumer/secret key pair you can use to consistently access the user's account.
-     * This is the preferred method of authentication over storing the username and password.
-     * Use the key pair as a signature with every subsequent call.
-     * The request must be signed using the application's developer and secret key token. Request or access tokens are necessary.
-     * Warning: DO NOT STORE THE USER'S PASSWORD! The way this call works is you call it once with the user's email and password and then
-     * keep the token around for later. You do NOT (I repeat NOT) call this before everything you do or on each program startup.
-     * We watch for this and will shut down your application with little notice if we catch you.
-     * In fact, the Objective-C code does this for you so you can't get it wrong.
-     *
-     * @return array successful verification of the user's credentials, returns an array representation of the access token and secret.
-     * @param $email string email account of the user.
-     * @param $password string password of the user.
-     */
-    public function token($email, $password)
-    {
-        // build parameters
-        $parameters = array();
-        $parameters['email'] = (string) $email;
-        $parameters['password'] = (string) $password;
-
-        // make the call
-        $response = (array) $this->doOAuthCall('0/token', $parameters);
-
-        // validate and set
-        if(isset($response['token'])) $this->setOAuthToken($response['token']);
-        if(isset($response['secret'])) $this->setOAuthTokenSecret($response['secret']);
-
-        // return
-        return $response;
-    }
-
     // account resources
-    /**
-     * Given a set of account information, the account call allows an application to create a new Dropbox user account.
-     * This is useful for situations where the trusted third party application is possibly the user's first interaction with Dropbox.
-     *
-     * @return bool
-     * @param $email string email account of the user.
-     * @param $password string password for the user.
-     * @param $firstName string user's first name.
-     * @param $lastName string user's last name.
-     */
-    public function account($email, $password, $firstName, $lastName)
-    {
-        // build parameters
-        $parameters['email'] = (string) $email;
-        $parameters['first_name'] = (string) $firstName;
-        $parameters['last_name'] = (string) $lastName;
-        $parameters['password'] = (string) $password;
-
-        return (bool) ($this->doCall('0/account', $parameters, 'POST', null, false) == 'OK');
-    }
-
     /**
      * Get the user account information.
      *
