@@ -3,6 +3,7 @@
 //require
 require_once '../../../autoload.php';
 require_once 'config.php';
+session_start();
 
 use \TijsVerkoyen\Dropbox\Dropbox;
 
@@ -10,10 +11,14 @@ use \TijsVerkoyen\Dropbox\Dropbox;
 $dropbox = new Dropbox(APPLICATION_KEY, APPLICATION_SECRET);
 
 // The code below will do the oAuth-dance
-//$response = $dropbox->oAuthRequestToken();
-//if(!isset($_GET['authorize'])) $dropbox->oAuthAuthorize($response['oauth_token'], 'http://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'] .'?authorize=true');
-//else $response = $dropbox->oAuthAccessToken($_GET['oauth_token']);
-//$response = $dropbox->token(EMAIL, PASSWORD);
+//if (!isset($_GET['authorize'])) {
+//  $response = $dropbox->oAuthRequestToken();
+//  $_SESSION['oauth_token_secret'] = $response['oauth_token_secret'];
+//  $dropbox->oAuthAuthorize($response['oauth_token'], 'http://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'] .'?authorize=true');
+//} else {
+//  $dropbox->setOAuthTokenSecret($_SESSION['oauth_token_secret']);
+//  $response = $dropbox->oAuthAccessToken($_GET['oauth_token']);
+//}
 //var_dump($response);
 //exit;
 
