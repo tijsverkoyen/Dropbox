@@ -40,5 +40,3 @@ $output = preg_replace('/\]\=\>\n(\s+)/m', '] => ', $output);
 
 // print
 echo '<pre>' . htmlspecialchars($output, ENT_QUOTES, 'UTF-8') . '</pre>';
-
-?>

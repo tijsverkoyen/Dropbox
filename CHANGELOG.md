@@ -1,3 +1,8 @@
+# Changelog since 1.0.6
+
+* Made it compliant with PSR
+* Made the class available through composer
+
 # Changelog since 1.0.5
 
 * Fixed filesPost so it can handle folders with spaces.

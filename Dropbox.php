@@ -5,7 +5,7 @@ namespace TijsVerkoyen\Dropbox;
  * Dropbox class
  *
  * @author Tijs Verkoyen <php-dropbox@verkoyen.eu>
- * @version 1.0.6
+ * @version 1.0.7
  * @copyright Copyright (c), Tijs Verkoyen. All rights reserved.
  * @license BSD License
  */
@@ -25,7 +25,7 @@ class Dropbox
     const API_PORT = 443;
 
     // current version
-    const VERSION = '1.0.6';
+    const VERSION = '1.0.7';
 
     /**
      * A cURL instance

@@ -1,0 +1,21 @@
+{
+	"name": "tijsverkoyen/dropbox",
+	"type": "library",
+	"description": "Dropbox is a wrapper-class to communicate with the Dropbox API.",
+	"homepage": "https://github.com/tijsverkoyen/Dropbox",
+	"license": "BSD",
+	"authors": [
+		{
+			"name": "Tijs Verkoyen",
+			"email": "php-dropbox@verkoyen.eu",
+			"role": "Developer"
+		}
+	],
+	"require": {
+		"php": ">=5.2.0",
+		"ext-curl": "*"
+	},
+	"autoload": {
+		"classmap": [""]
+	}
+}
