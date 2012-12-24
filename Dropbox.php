@@ -778,18 +778,22 @@ class Dropbox
     /**
      * Get a minimized thumbnail for a photo.
      *
-     * @return string return a base64_encode string with the JPEG-data
-     * @param $path string path to the photo.
-     * @param $size string[optional] size, possible values are: 'small' (32x32), 'medium' (64x64), 'large' (128x128).
+     * @param  string[optional] $path    The path to the file or folder.
+     * @param  string[optional] $size    Possible values are: 'xs' (32x32), 's' (64x64), 'm' (128x128), 'l' (640x480), 'xl' (1024x768).
+     * @param  string[optional] $format  For images that are photos, jpeg should be preferred, while png is better for screenshots and digital art.
+     * @param  bool[optional]   $sandbox The metadata returned will have its size field translated based on the given locale.
+     * @return string           An array with the content-type and the data as a base64-encoded string.
      */
-    public function thumbnails($path, $size = 'small')
+    public function thumbnails($path, $size = 'small', $format = 'jpeg', $sandbox = false)
     {
         // build url
-        $url = '0/thumbnails/dropbox/';
+        $url = '1/thumbnails/';
+        $url .= ($sandbox) ? 'sandbox/' : 'dropbox/';
         $url .= trim((string) $path, '/');
 
         // build parameters
         $parameters['size'] = (string) $size;
+        $parameters['format'] = (string) $format;
 
         // make the call
         return $this->doCall($url, $parameters, 'GET', null, false, true);
