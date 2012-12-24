@@ -663,7 +663,7 @@ class Dropbox
     {
         if(is_array($value))
 
-            return array_map(array('Dropbox', 'urlencode_rfc3986'), $value);
+            return array_map(array(__CLASS__, 'urlencode_rfc3986'), $value);
         else {
             $search = array('+', ' ', '%7E', '%');
             $replace = array('%20', '%20', '~', '%25');
