@@ -740,6 +740,7 @@ class Dropbox
      * @param  bool[optional]   $list           If true, the folder's metadata will include a contents field with a list of metadata entries for the contents of the folder. If false, the contents field will be omitted.
      * @param  bool[optional]   $includeDeleted Only applicable when list is set. If this parameter is set to true, then contents will include the metadata of deleted children. Note that the target of the metadata call is always returned even when it has been deleted (with is_deleted set to true) regardless of this flag.
      * @param  string[optional] $rev            If you include a particular revision number, then only the metadata for that revision will be returned.
+     * @param  string[optional] $locale         The metadata returned will have its size field translated based on the given locale.
      * @param  bool[optional]   $sandbox        The metadata returned will have its size field translated based on the given locale.
      * @return array
      */
