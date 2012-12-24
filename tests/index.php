@@ -21,21 +21,23 @@ $dropbox->setOAuthToken(TOKEN);
 $dropbox->setOAuthTokenSecret(TOKEN_SECRET);
 
 try {
-    $response = $dropbox->account(time() . '-dropbox@verkoyen.eu', PASSWORD, 'Tijs', 'Verkoyen');
-    $response = $dropbox->accountInfo();
-    $response = $dropbox->filesGet(BASE_PATH .'hàh@, $.txt');
-    $response = $dropbox->filesPost(BASE_PATH, realpath('../dropbox.php'));
-    $response = $dropbox->filesPost(BASE_PATH .'with spaces', realpath('../dropbox.php'));
-    $response = $dropbox->filesPost(BASE_PATH .'met spaties/', realpath('/Users/tijs/Projects/dropbox/tests/with spaces.txt'));
-    $response = $dropbox->metadata(BASE_PATH .'met spaties');
-    $response = $dropbox->thumbnails(BASE_PATH .'image.png');
-
-    $response = $dropbox->fileopsCopy(BASE_PATH . 'image.png', BASE_PATH . 'copy_' . time());
-    $response = $dropbox->fileopsCreateFolder(BASE_PATH .'created_'. time());
-    $response = $dropbox->fileopsDelete(BASE_PATH .'will_be_deleted');
-    $response = $dropbox->fileopsMove(BASE_PATH .'will_be_moved', BASE_PATH .'moved_'. time());
+//	@todo response = $dropbox->account(time() . '-dropbox@verkoyen.eu', PASSWORD, 'Tijs', 'Verkoyen');
+//	@todo response = $dropbox->accountInfo();
+//
+//	@todo response = $dropbox->filesGet(BASE_PATH .'hàh@, $.txt');
+//	@todo response = $dropbox->filesPost(BASE_PATH, realpath('../dropbox.php'));
+//	@todo response = $dropbox->filesPost(BASE_PATH .'with spaces', realpath('../dropbox.php'));
+//	@todo response = $dropbox->filesPost(BASE_PATH .'met spaties/', realpath('/Users/tijs/Projects/dropbox/tests/with spaces.txt'));
+//
+//	@todo response = $dropbox->metadata(BASE_PATH .'met spaties');
+//	@todo response = $dropbox->thumbnails(BASE_PATH .'image.png');
+//
+//	@todo response = $dropbox->fileopsCopy(BASE_PATH . 'image.png', BASE_PATH . 'copy_' . time());
+//	@todo response = $dropbox->fileopsCreateFolder(BASE_PATH .'created_'. time());
+//	@todo response = $dropbox->fileopsDelete(BASE_PATH .'will_be_deleted');
+//	@todo response = $dropbox->fileopsMove(BASE_PATH .'will_be_moved', BASE_PATH .'moved_'. time());
 } catch (Exception $e) {
-    var_dump($e);
+  var_dump($e);
 }
 
 // output
