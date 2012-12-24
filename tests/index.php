@@ -26,7 +26,6 @@ $dropbox->setOAuthToken(TOKEN);
 $dropbox->setOAuthTokenSecret(TOKEN_SECRET);
 
 try {
-//	@todo response = $dropbox->account(time() . '-dropbox@verkoyen.eu', PASSWORD, 'Tijs', 'Verkoyen');
 //	@todo response = $dropbox->accountInfo();
 //
 //	@todo response = $dropbox->filesGet(BASE_PATH .'hàh@, $.txt');
