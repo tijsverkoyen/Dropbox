@@ -790,7 +790,7 @@ class Dropbox
 
     // file operations
     /**
-     * Copy a file or folder to a new location.
+     * Copies a file or folder to a new location.
      *
      * @param  string[optional] $fromPath    Specifies the file or folder to be copied from relative to root.
      * @param  string           $toPath      Specifies the destination path, including the new name for the file or folder, relative to root.
@@ -816,7 +816,7 @@ class Dropbox
     }
 
     /**
-     * Create a folder relative to the user's Dropbox root or the user's application sandbox folder.
+     * Creates a folder.
      *
      * @param  string           $path    The path to the new folder to create relative to root.
      * @param  string[optional] $locale  The metadata returned will have its size field translated based on the given locale.
@@ -860,22 +860,24 @@ class Dropbox
     }
 
     /**
-     * Move a file or folder to a new location.
+     * Moves a file or folder to a new location.
      *
+     * @param  string           $fromPath Specifies the file or folder to be moved from relative to root.
+     * @param  string           $toPath   Specifies the destination path, including the new name for the file or folder, relative to root.
+     * @param  string[optional] $locale   The metadata returned will have its size field translated based on the given locale.
+     * @param  bool[optional]   $sandbox  The metadata returned will have its size field translated based on the given locale.
      * @return array
-     * @param $fromPath string specifies either a file or folder to be copied to the location specified by toPath. This path is interpreted relative to the location specified by root.
-     * @param $toPath string specifies the destination path including the new name for file or folder. This path is interpreted relative to the location specified by root.
-     * @param $sandbox bool[optional] mode?
      */
-    public function fileopsMove($fromPath, $toPath, $sandbox = false)
+    public function fileopsMove($fromPath, $toPath, $locale = null, $sandbox = false)
     {
         // build url
-        $url = '0/fileops/move';
+        $url = '1/fileops/move';
 
         // build parameters
         $parameters['from_path'] = (string) $fromPath;
         $parameters['to_path'] = (string) $toPath;
         $parameters['root'] = ($sandbox) ? 'sandbox' : 'dropbox';
+        if($locale !== null) $parameters['locale'] = (string) $locale;
 
         // make the call
         return $this->doCall($url, $parameters, 'POST');
