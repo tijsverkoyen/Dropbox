@@ -30,7 +30,7 @@ try {
 //
 //  $response = $dropbox->filesGet(BASE_PATH .'hàh@, $.txt');
 //	@todo $response = $dropbox->filesPut();
-//  $response = $dropbox->filesPost(BASE_PATH .'met spaties/', realpath(dirname(__FILE__)) . '/with spaces.txt', true);
+//  $response = $dropbox->filesPost(BASE_PATH .'with spaces/', realpath(dirname(__FILE__)) . '/with spaces.txt', true);
 //
 //  $response = $dropbox->metadata(BASE_PATH .'met spaties');
 //  $response = $dropbox->thumbnails(BASE_PATH .'image.png');

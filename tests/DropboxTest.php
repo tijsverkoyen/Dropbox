@@ -1,16 +1,16 @@
 <?php
 
 require_once 'config.php';
-require_once '../dropbox.php';
-
+require_once '../Dropbox.php';
 require_once 'PHPUnit/Framework/TestCase.php';
+
+use \TijsVerkoyen\Dropbox\Dropbox;
 
 /**
  * Dropbox test case.
  */
 class DropboxTest extends PHPUnit_Framework_TestCase
 {
-
     /**
      * @var Dropbox
      */
@@ -21,8 +21,10 @@ class DropboxTest extends PHPUnit_Framework_TestCase
      */
     protected function setUp()
     {
+        // call parent
         parent::setUp();
 
+        // create instance
         $this->dropbox = new Dropbox(APPLICATION_KEY, APPLICATION_SECRET);
         $this->dropbox->setOAuthToken(TOKEN);
         $this->dropbox->setOAuthTokenSecret(TOKEN_SECRET);
@@ -33,8 +35,10 @@ class DropboxTest extends PHPUnit_Framework_TestCase
      */
     protected function tearDown()
     {
+        // unset instance
         $this->dropbox = null;
 
+        // call parent
         parent::tearDown();
     }
 
@@ -61,18 +65,11 @@ class DropboxTest extends PHPUnit_Framework_TestCase
      */
     public function testOAuthRequestToken()
     {
+        $this->dropbox->setOAuthToken('');
+        $this->dropbox->setOAuthTokenSecret('');
         $response = $this->dropbox->oAuthRequestToken();
-
         $this->assertArrayHasKey('oauth_token_secret', $response);
         $this->assertArrayHasKey('oauth_token', $response);
-    }
-
-    /**
-     * Tests Dropbox->account()
-     */
-    public function testAccount()
-    {
-        $this->assertTrue($this->dropbox->account(time() . '-dropbox@verkoyen.eu', PASSWORD, 'Tijs', 'Verkoyen'));
     }
 
     /**
@@ -94,24 +91,8 @@ class DropboxTest extends PHPUnit_Framework_TestCase
     public function testFilesGet()
     {
         $response = $this->dropbox->filesGet(BASE_PATH . 'hàh@, $.txt');
-
         $this->assertArrayHasKey('content_type', $response);
         $this->assertArrayHasKey('data', $response);
-    }
-
-    /**
-     * Tests Dropbox->filesPost()
-     */
-    public function testFilesPost()
-    {
-        $this->assertTrue($this->dropbox->filesPost(BASE_PATH, realpath('/Users/tijs/Projects/dropbox/dropbox.php')));
-        $this->assertTrue($this->dropbox->filesPost(BASE_PATH, realpath('/Users/tijs/Projects/dropbox/tests/with spaces.txt')));
-        $this->assertTrue($this->dropbox->filesPost(BASE_PATH . 'with spaces', realpath('/Users/tijs/Projects/dropbox/tests/with spaces.txt')));
-
-        // cleanup
-        $this->dropbox->fileopsDelete(BASE_PATH . 'dropbox.php');
-        $this->dropbox->fileopsDelete(BASE_PATH . 'with spaces.txt');
-        $this->dropbox->fileopsDelete(BASE_PATH . 'with spaces/with spaces.txt');
     }
 
     /**
