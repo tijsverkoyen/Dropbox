@@ -1,4 +1,5 @@
 <?php
+namespace TijsVerkoyen\Dropbox;
 
 /**
  * Dropbox class
