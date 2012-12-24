@@ -26,7 +26,7 @@ $dropbox->setOAuthToken(TOKEN);
 $dropbox->setOAuthTokenSecret(TOKEN_SECRET);
 
 try {
-//	@todo response = $dropbox->accountInfo();
+//  $response = $dropbox->accountInfo();
 //
 //	@todo response = $dropbox->filesGet(BASE_PATH .'hàh@, $.txt');
 //	@todo response = $dropbox->filesPost(BASE_PATH, realpath('../dropbox.php'));

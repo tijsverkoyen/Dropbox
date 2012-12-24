@@ -695,7 +695,7 @@ class Dropbox
     public function accountInfo()
     {
         // make the call
-        return (array) $this->doCall('0/account/info');
+        return (array) $this->doCall('1/account/info');
     }
 
     // files & metadata
