@@ -8,6 +8,9 @@
  * The class is documented in the file itself. If you find any bugs help me out and report them. Reporting can be done by sending an email to php-dropbox-bugs[at]verkoyen[dot]eu.
  * If you report a bug, make sure you give me enough information (include your code).
  *
+ * @todo	implement /delta
+ * @todo	implement /copy_ref
+ *
  * Changelog since 1.0.5
  * - Fixed filesPost so it can handle folders with spaces.
  *
@@ -38,11 +41,11 @@
  *
  * This software is provided by the author "as is" and any express or implied warranties, including, but not limited to, the implied warranties of merchantability and fitness for a particular purpose are disclaimed. In no event shall the author be liable for any direct, indirect, incidental, special, exemplary, or consequential damages (including, but not limited to, procurement of substitute goods or services; loss of use, data, or profits; or business interruption) however caused and on any theory of liability, whether in contract, strict liability, or tort (including negligence or otherwise) arising in any way out of the use of this software, even if advised of the possibility of such damage.
  *
- * @author		Tijs Verkoyen <php-dropbox@verkoyen.eu>
- * @version		1.0.6
+ * @author Tijs Verkoyen <php-dropbox@verkoyen.eu>
+ * @version 1.0.6
  *
- * @copyright	Copyright (c), Tijs Verkoyen. All rights reserved.
- * @license		BSD License
+ * @copyright Copyright (c), Tijs Verkoyen. All rights reserved.
+ * @license BSD License
  */
 class Dropbox
 {
@@ -51,7 +54,9 @@ class Dropbox
 
 	// url for the dropbox-api
 	const API_URL = 'https://api.dropbox.com';
+
 	const API_AUTH_URL = 'https://www.dropbox.com';
+
 	const API_CONTENT_URL = 'https://api-content.dropbox.com';
 
 	// port for the dropbox-api
@@ -60,70 +65,61 @@ class Dropbox
 	// current version
 	const VERSION = '1.0.6';
 
-
 	/**
 	 * A cURL instance
 	 *
-	 * @var	resource
+	 * @var resource
 	 */
 	private $curl;
-
 
 	/**
 	 * The application key
 	 *
-	 * @var	string
+	 * @var string
 	 */
 	private $applicationKey;
-
 
 	/**
 	 * The application secret
 	 *
-	 * @var	string
+	 * @var string
 	 */
 	private $applicationSecret;
-
 
 	/**
 	 * The oAuth-token
 	 *
-	 * @var	string
+	 * @var string
 	 */
 	private $oAuthToken = '';
-
 
 	/**
 	 * The oAuth-token-secret
 	 *
-	 * @var	string
+	 * @var string
 	 */
 	private $oAuthTokenSecret = '';
-
 
 	/**
 	 * The timeout
 	 *
-	 * @var	int
+	 * @var int
 	 */
 	private $timeOut = 60;
-
 
 	/**
 	 * The user agent
 	 *
-	 * @var	string
+	 * @var string
 	 */
 	private $userAgent;
 
-
-// class methods
+	// class methods
 	/**
 	 * Default constructor
 	 *
-	 * @return	void
-	 * @param	string $applicationKey		The application key to use.
-	 * @param	string $applicationSecret	The application secret to use.
+	 * @param $applicationKey string application key to use.
+	 * @param $applicationSecret string application secret to use.
 	 */
 	public function __construct($applicationKey, $applicationSecret)
 	{
@@ -131,23 +127,19 @@ class Dropbox
 		$this->setApplicationSecret($applicationSecret);
 	}
 
-
 	/**
 	 * Default destructor
-	 *
-	 * @return	void
 	 */
 	public function __destruct()
 	{
 		if($this->curl != null) curl_close($this->curl);
 	}
 
-
 	/**
 	 * Format the parameters as a querystring
 	 *
-	 * @return	string
-	 * @param	array $parameters	The parameters to pass.
+	 * @return string
+	 * @param $parameters array parameters to pass.
 	 */
 	private function buildQuery(array $parameters)
 	{
@@ -174,12 +166,12 @@ class Dropbox
 		}
 
 		// process parameters
-		foreach($parameters as $key => $value) $chunks[] = $key . '=' . str_replace('%25', '%', $value);
+		foreach($parameters as $key => $value)
+			$chunks[] = $key . '=' . str_replace('%25', '%', $value);
 
-		// return
+			// return
 		return implode('&', $chunks);
 	}
-
 
 	/**
 	 * All OAuth 1.0 requests use the same basic algorithm for creating a signature base string and a signature.
@@ -191,10 +183,10 @@ class Dropbox
 	 * Instead of using the equals ("=") sign to mark the key/value relationship, you use the URL-encoded form of "%3D". Each parameter is then joined by the
 	 * URL-escaped ampersand sign, "%26".
 	 *
-	 * @return	string
-	 * @param	string $url			The url to use.
-	 * @param	string $method		The method that will be called.
-	 * @param	array $parameters	The parameters to pass.
+	 * @return string
+	 * @param $url string url to use.
+	 * @param $method string method that will be called.
+	 * @param $parameters array parameters to pass.
 	 */
 	private function calculateBaseString($url, $method, array $parameters)
 	{
@@ -228,7 +220,8 @@ class Dropbox
 
 		foreach($urlChunks as &$chunk)
 		{
-			if($i > 4) $chunk = self::urlencode_rfc3986($chunk);
+			if($i > 4)
+				$chunk = self::urlencode_rfc3986($chunk);
 			else $chunk = urlencode($chunk);
 
 			$i++;
@@ -246,14 +239,12 @@ class Dropbox
 		return $base;
 	}
 
-
 	/**
 	 * Build the Authorization header
-	 * @later: fix me
 	 *
-	 * @return	string
-	 * @param	array $parameters	The parameters to pass.
-	 * @param	string $url			The url to use.
+	 * @return string
+	 * @param $parameters array parameters to pass.
+	 * @param $url string url to use.
 	 */
 	private function calculateHeader(array $parameters, $url)
 	{
@@ -267,9 +258,10 @@ class Dropbox
 		$chunks = array();
 
 		// process queries
-		foreach($parameters as $key => $value) $chunks[] = str_replace('%25', '%', self::urlencode_rfc3986($key) . '="' . self::urlencode_rfc3986($value) . '"');
+		foreach($parameters as $key => $value)
+			$chunks[] = str_replace('%25', '%', self::urlencode_rfc3986($key) . '="' . self::urlencode_rfc3986($value) . '"');
 
-		// build return
+			// build return
 		$return = 'Authorization: OAuth realm="' . $parts['scheme'] . '://' . $parts['host'] . $parts['path'] . '", ';
 		$return .= implode(',', $chunks);
 
@@ -277,16 +269,15 @@ class Dropbox
 		return $return;
 	}
 
-
 	/**
 	 * Make an call to the oAuth
-	 * @todo	refactor me
 	 *
-	 * @return	array
-	 * @param	string $url						The url that has to be called.
-	 * @param	array[optional] $parameters		The parameters to pass.
-	 * @param	string[optional] $method		Which HTTP-method should we use? Possible values are POST, GET.
-	 * @param	bool[optional] $expectJSON		Do we expect JSON?
+	 * @todo refactor me
+	 * @return array
+	 * @param $url string url that has to be called.
+	 * @param $parameters array[optional] parameters to pass.
+	 * @param $method string[optional] HTTP-method should we use? Possible values are POST, GET.
+	 * @param $expectJSON bool[optional] we expect JSON?
 	 */
 	private function doOAuthCall($url, array $parameters = null, $method = 'POST', $expectJSON = true)
 	{
@@ -360,17 +351,16 @@ class Dropbox
 		return $response;
 	}
 
-
 	/**
 	 * Make the call
 	 *
-	 * @return	string
-	 * @param	string $url						The url to call.
-	 * @param	array[optional] $parameters		Optional parameters.
-	 * @param	bool[optional] $method			The method to use. Possible values are GET, POST.
-	 * @param	string[optional] $filePath		The path to the file to upload.
-	 * @param	bool[optional] $expectJSON		Do we expect JSON?
-	 * @param	bool[optional] $isContent		Is this content?
+	 * @return string
+	 * @param $url string url to call.
+	 * @param $parameters array[optional] parameters.
+	 * @param $method bool[optional] method to use. Possible values are GET, POST.
+	 * @param $filePath string[optional] path to the file to upload.
+	 * @param $expectJSON bool[optional] we expect JSON?
+	 * @param $isContent bool[optional] this content?
 	 */
 	private function doCall($url, array $parameters = null, $method = 'GET', $filePath = null, $expectJSON = true, $isContent = false)
 	{
@@ -399,9 +389,10 @@ class Dropbox
 		if(!empty($parameters))
 		{
 			// convert to UTF-8
-			foreach($parameters as &$value) $value = utf8_encode($value);
+			foreach($parameters as &$value)
+				$value = utf8_encode($value);
 
-			// merge
+				// merge
 			$data = array_merge($data, $parameters);
 		}
 
@@ -416,7 +407,8 @@ class Dropbox
 		}
 
 		// calculate the base string
-		if($isContent) $base = $this->calculateBaseString(self::API_CONTENT_URL . '/' . $url, $method, $data);
+		if($isContent)
+			$base = $this->calculateBaseString(self::API_CONTENT_URL . '/' . $url, $method, $data);
 		else $base = $this->calculateBaseString(self::API_URL . '/' . $url, $method, $data);
 
 		// based on the method, we should handle the parameters in a different way
@@ -448,9 +440,10 @@ class Dropbox
 			}
 
 			// no file
-			else $options[CURLOPT_POSTFIELDS] = $this->buildQuery($parameters);
+			else
+				$options[CURLOPT_POSTFIELDS] = $this->buildQuery($parameters);
 
-			// enable post
+				// enable post
 			$options[CURLOPT_POST] = 1;
 		}
 
@@ -467,12 +460,14 @@ class Dropbox
 		// add sign into the parameters
 		$oauth['oauth_signature'] = $this->hmacsha1($this->getApplicationSecret() . '&' . $this->getOAuthTokenSecret(), $base);
 
-		if($isContent) $headers[] = $this->calculateHeader($oauth, self::API_CONTENT_URL . '/' . $url);
+		if($isContent)
+			$headers[] = $this->calculateHeader($oauth, self::API_CONTENT_URL . '/' . $url);
 		else $headers[] = $this->calculateHeader($oauth, self::API_URL . '/' . $url);
 		$headers[] = 'Expect:';
 
 		// set options
-		if($isContent) $options[CURLOPT_URL] = self::API_CONTENT_URL . '/' . $url;
+		if($isContent)
+			$options[CURLOPT_URL] = self::API_CONTENT_URL . '/' . $url;
 		else $options[CURLOPT_URL] = self::API_URL . '/' . $url;
 		$options[CURLOPT_PORT] = self::API_PORT;
 		$options[CURLOPT_USERAGENT] = $this->getUserAgent();
@@ -566,8 +561,10 @@ class Dropbox
 				echo '</pre>';
 			}
 
-			if(isset($json['error']) && is_string($json['error'])) $message = $json['error'];
-			elseif(isset($json['error']['hash']) && $json['error']['hash'] != '') $message = (string) $json['error']['hash'];
+			if(isset($json['error']) && is_string($json['error']))
+				$message = $json['error'];
+			elseif(isset($json['error']['hash']) && $json['error']['hash'] != '')
+				$message = (string) $json['error']['hash'];
 			else $message = 'Invalid response.';
 
 			// throw exception
@@ -578,169 +575,152 @@ class Dropbox
 		return $json;
 	}
 
-
 	/**
 	 * Get the application key
 	 *
-	 * @return	string
+	 * @return string
 	 */
 	private function getApplicationKey()
 	{
 		return $this->applicationKey;
 	}
 
-
 	/**
 	 * Get the application secret
 	 *
-	 * @return	string
+	 * @return string
 	 */
 	private function getApplicationSecret()
 	{
 		return $this->applicationSecret;
 	}
 
-
 	/**
 	 * Get the oAuth-token
 	 *
-	 * @return	string
+	 * @return string
 	 */
 	private function getOAuthToken()
 	{
 		return $this->oAuthToken;
 	}
 
-
 	/**
 	 * Get the oAuth-token-secret
 	 *
-	 * @return	string
+	 * @return string
 	 */
 	private function getOAuthTokenSecret()
 	{
 		return $this->oAuthTokenSecret;
 	}
 
-
 	/**
 	 * Get the timeout
 	 *
-	 * @return	int
+	 * @return int
 	 */
 	public function getTimeOut()
 	{
 		return (int) $this->timeOut;
 	}
 
-
 	/**
-	 * Get the useragent that will be used. Our version will be prepended to yours.
+	 * Get the useragent that will be used.
+	 * Our version will be prepended to yours.
 	 * It will look like: "PHP Dropbox/<version> <your-user-agent>"
 	 *
-	 * @return	string
+	 * @return string
 	 */
 	public function getUserAgent()
 	{
 		return (string) 'PHP Dropbox/' . self::VERSION . ' ' . $this->userAgent;
 	}
 
-
 	/**
 	 * Set the application key
 	 *
-	 * @return	void
-	 * @param	string $key		The application key to use.
+	 * @param $key string application key to use.
 	 */
 	private function setApplicationKey($key)
 	{
 		$this->applicationKey = (string) $key;
 	}
 
-
 	/**
 	 * Set the application secret
 	 *
-	 * @return	void
-	 * @param	string $secret	The application secret to use.
+	 * @param $secret string application secret to use.
 	 */
 	private function setApplicationSecret($secret)
 	{
 		$this->applicationSecret = (string) $secret;
 	}
 
-
 	/**
 	 * Set the oAuth-token
 	 *
-	 * @return	void
-	 * @param	string $token	The token to use.
+	 * @param $token string token to use.
 	 */
 	public function setOAuthToken($token)
 	{
 		$this->oAuthToken = (string) $token;
 	}
 
-
 	/**
 	 * Set the oAuth-secret
 	 *
-	 * @return	void
-	 * @param	string $secret	The secret to use.
+	 * @param $secret string secret to use.
 	 */
 	public function setOAuthTokenSecret($secret)
 	{
 		$this->oAuthTokenSecret = (string) $secret;
 	}
 
-
 	/**
 	 * Set the timeout
 	 *
-	 * @return	void
-	 * @param	int $seconds	The timeout in seconds.
+	 * @param $seconds int timeout in seconds.
 	 */
 	public function setTimeOut($seconds)
 	{
 		$this->timeOut = (int) $seconds;
 	}
 
-
 	/**
-	 * Get the useragent that will be used. Our version will be prepended to yours.
+	 * Get the useragent that will be used.
+	 * Our version will be prepended to yours.
 	 * It will look like: "PHP Dropbox/<version> <your-user-agent>"
 	 *
-	 * @return	void
-	 * @param	string $userAgent	Your user-agent, it should look like <app-name>/<app-version>.
+	 * @param $userAgent string user-agent, it should look like <app-name>/<app-version>.
 	 */
 	public function setUserAgent($userAgent)
 	{
 		$this->userAgent = (string) $userAgent;
 	}
 
-
 	/**
 	 * Build the signature for the data
 	 *
-	 * @return	string
-	 * @param	string $key		The key to use for signing.
-	 * @param	string $data	The data that has to be signed.
+	 * @return string
+	 * @param $key string key to use for signing.
+	 * @param $data string data that has to be signed.
 	 */
 	private function hmacsha1($key, $data)
 	{
 		return base64_encode(hash_hmac('SHA1', $data, $key, true));
 	}
 
-
 	/**
 	 * URL-encode method for internatl use
 	 *
-	 * @return	string
-	 * @param	mixed $value	The value to encode.
+	 * @return string
+	 * @param $value mixed value to encode.
 	 */
 	private static function urlencode_rfc3986($value)
 	{
-		if(is_array($value)) return array_map(array('Dropbox', 'urlencode_rfc3986'), $value);
+		if(is_array($value))
+			return array_map(array('Dropbox', 'urlencode_rfc3986'), $value);
 		else
 		{
 			$search = array('+', ' ', '%7E', '%');
@@ -750,14 +730,13 @@ class Dropbox
 		}
 	}
 
-
-// oauth resources
+	// oauth resources
 	/**
 	 * Call for obtaining an OAuth request token.
 	 * Returns a request token and the corresponding request token secret. This token and secret cannot be used to sign requests for the /metadata and /file content API calls.
 	 * Their only purpose is for signing a request to oauth/access_token once the user has gone through the application authorization steps provided by oauth/authorize.
 	 *
-	 * @return	array
+	 * @return array
 	 */
 	public function oAuthRequestToken()
 	{
@@ -782,18 +761,17 @@ class Dropbox
 		return $return;
 	}
 
-
 	/**
 	 * Redirect the user to the oauth/authorize location so that Dropbox can authenticate the user and ask whether or not the user wants to authorize the application to access
-	 * file metadata and content on its behalf. oauth/authorize is not an API call per se, because it does not have a return value, but rather directs the user to a page on
+	 * file metadata and content on its behalf.
+	 * oauth/authorize is not an API call per se, because it does not have a return value, but rather directs the user to a page on
 	 * api.dropbox.com where they are provided means to log in to Dropbox and grant authority to the application requesting it.
 	 * The page served by oauth/authorize should be presented to the user through their web browser.
 	 * Please note, without directing the user to a Dropbox-provided page via oauth/authorize, it is impossible for your application to use the request token it received
 	 * via oauth/request_token to obtain an access token from oauth/access_token.
 	 *
-	 * @return	void
-	 * @param	string $oauthToken					The request token of the application requesting authority from a user.
-	 * @param	string[optional] $oauthCallback		After the user authorizes an application, the user is redirected to the application-served URL provided by this parameter.
+	 * @param $oauthToken string request token of the application requesting authority from a user.
+	 * @param $oauthCallback string[optional] the user authorizes an application, the user is redirected to the application-served URL provided by this parameter.
 	 */
 	public function oAuthAuthorize($oauthToken, $oauthCallback = null)
 	{
@@ -807,16 +785,15 @@ class Dropbox
 
 		// redirect
 		header('Location: ' . $url);
-		exit;
+		exit();
 	}
-
 
 	/**
 	 * This call returns a access token and the corresponding access token secret.
 	 * Upon return, the authorization process is now complete and the access token and corresponding secret are used to sign requests for the metadata and file content API calls.
 	 *
-	 * @return	array
-	 * @param	string $oauthToken	The token returned after authorizing.
+	 * @return array
+	 * @param $oauthToken string token returned after authorizing.
 	 */
 	public function oAuthAccessToken($oauthToken)
 	{
@@ -845,22 +822,20 @@ class Dropbox
 		return $return;
 	}
 
-
-// token resources
+	// token resources
 	/**
 	 * The token call provides a consumer/secret key pair you can use to consistently access the user's account.
 	 * This is the preferred method of authentication over storing the username and password.
 	 * Use the key pair as a signature with every subsequent call.
 	 * The request must be signed using the application's developer and secret key token. Request or access tokens are necessary.
-	 *
 	 * Warning: DO NOT STORE THE USER'S PASSWORD! The way this call works is you call it once with the user's email and password and then
 	 * keep the token around for later. You do NOT (I repeat NOT) call this before everything you do or on each program startup.
 	 * We watch for this and will shut down your application with little notice if we catch you.
 	 * In fact, the Objective-C code does this for you so you can't get it wrong.
 	 *
-	 * @return	array				Upon successful verification of the user's credentials, returns an array representation of the access token and secret.
-	 * @param	string $email		The email account of the user.
-	 * @param	string $password	The password of the user.
+	 * @return array successful verification of the user's credentials, returns an array representation of the access token and secret.
+	 * @param $email string email account of the user.
+	 * @param $password string password of the user.
 	 */
 	public function token($email, $password)
 	{
@@ -880,17 +855,16 @@ class Dropbox
 		return $response;
 	}
 
-
-// account resources
+	// account resources
 	/**
 	 * Given a set of account information, the account call allows an application to create a new Dropbox user account.
 	 * This is useful for situations where the trusted third party application is possibly the user's first interaction with Dropbox.
 	 *
-	 * @return	bool
-	 * @param	string $email		The email account of the user.
-	 * @param	string $password	The password for the user.
-	 * @param	string $firstName	The user's first name.
-	 * @param	string $lastName	The user's last name.
+	 * @return bool
+	 * @param $email string email account of the user.
+	 * @param $password string password for the user.
+	 * @param $firstName string user's first name.
+	 * @param $lastName string user's last name.
 	 */
 	public function account($email, $password, $firstName, $lastName)
 	{
@@ -903,11 +877,10 @@ class Dropbox
 		return (bool) ($this->doCall('0/account', $parameters, 'POST', null, false) == 'OK');
 	}
 
-
 	/**
 	 * Get the user account information.
 	 *
-	 * @return	array
+	 * @return array
 	 */
 	public function accountInfo()
 	{
@@ -915,14 +888,13 @@ class Dropbox
 		return (array) $this->doCall('0/account/info');
 	}
 
-
-// files & metadata
+	// files & metadata
 	/**
 	 * Retrieves file contents relative to the user's Dropbox root or the application's directory within the user's Dropbox.
 	 *
-	 * @return	string
-	 * @param	string $path				Path of the directory wherin the file is located.
-	 * @param	bool[optional] $sandbox		Sandbox mode?
+	 * @return string
+	 * @param $path string of the directory wherin the file is located.
+	 * @param $sandbox bool[optional] mode?
 	 */
 	public function filesGet($path, $sandbox = false)
 	{
@@ -935,14 +907,13 @@ class Dropbox
 		return $this->doCall($url, null, 'GET', null, false, true);
 	}
 
-
 	/**
 	 * Uploads file contents relative to the user's Dropbox root or the application's directory within the user's Dropbox.
 	 *
-	 * @return	bool
-	 * @param	string $path				Path of the directory wherin the file should be uploaded.
-	 * @param	string $localFile			Path to the local file.
-	 * @param	bool[optional] $sandbox		Sandbox mode?
+	 * @return bool
+	 * @param $path string of the directory wherin the file should be uploaded.
+	 * @param $localFile string to the local file.
+	 * @param $sandbox bool[optional] mode?
 	 */
 	public function filesPost($path, $localFile, $sandbox = false)
 	{
@@ -958,18 +929,18 @@ class Dropbox
 		return (bool) (isset($return['result']) && $return['result'] == 'winner!');
 	}
 
-
 	/**
 	 * Returns metadata for the file or directory at the given <path> location relative to the user's Dropbox or
-	 * the user's application sandbox. If <path> represents a directory and the list parameter is true, the metadata will
+	 * the user's application sandbox.
+	 * If <path> represents a directory and the list parameter is true, the metadata will
 	 * also include a listing of metadata for the directory's contents.
 	 *
-	 * @return	array
-	 * @param	string[optional] $path		The path to the file/director to get the metadata for.
-	 * @param	int[optional] $fileLimit	When listing a directory, the service will not report listings containing more than $fileLimit files.
-	 * @param	bool[optional] $hash		Listing return values include a hash representing the state of the directory's contents.
-	 * @param	bool[optional] $list		If true, this call returns a list of metadata representations for the contents of the directory. If false, this call returns the metadata for the directory itself.
-	 * @param	bool[optional] $sandbox		Sandbox mode?
+	 * @return array
+	 * @param $path string[optional] path to the file/director to get the metadata for.
+	 * @param $fileLimit int[optional] listing a directory, the service will not report listings containing more than $fileLimit files.
+	 * @param $hash bool[optional] return values include a hash representing the state of the directory's contents.
+	 * @param $list bool[optional] true, this call returns a list of metadata representations for the contents of the directory. If false, this call returns the metadata for the directory itself.
+	 * @param $sandbox bool[optional] mode?
 	 */
 	public function metadata($path = '', $fileLimit = 10000, $hash = false, $list = true, $sandbox = false)
 	{
@@ -982,19 +953,18 @@ class Dropbox
 		$parameters = null;
 		$parameters['file_limit'] = (int) $fileLimit;
 		if((bool) $hash) $parameters['hash'] = '';
-		$parameters['list'] = ($list) ? 'true': 'false';
+		$parameters['list'] = ($list) ? 'true' : 'false';
 
 		// make the call
 		return (array) $this->doCall($url, $parameters);
 	}
 
-
 	/**
 	 * Get a minimized thumbnail for a photo.
 	 *
-	 * @return	string					Will return a base64_encode string with the JPEG-data
-	 * @param	string $path			The path to the photo.
-	 * @param	string[optional] $size	The size, possible values are: 'small' (32x32), 'medium' (64x64), 'large' (128x128).
+	 * @return string return a base64_encode string with the JPEG-data
+	 * @param $path string path to the photo.
+	 * @param $size string[optional] size, possible values are: 'small' (32x32), 'medium' (64x64), 'large' (128x128).
 	 */
 	public function thumbnails($path, $size = 'small')
 	{
@@ -1009,15 +979,14 @@ class Dropbox
 		return $this->doCall($url, $parameters, 'GET', null, false, true);
 	}
 
-
-// file operations
+	// file operations
 	/**
 	 * Copy a file or folder to a new location.
 	 *
-	 * @return	array
-	 * @param	string $fromPath			fromPath specifies either a file or folder to be copied to the location specified by toPath. This path is interpreted relative to the location specified by root.
-	 * @param	string $toPath				toPath specifies the destination path including the new name for file or folder. This path is interpreted relative to the location specified by root.
-	 * @param	bool[optional] $sandbox		Sandbox mode?
+	 * @return array
+	 * @param $fromPath string specifies either a file or folder to be copied to the location specified by toPath. This path is interpreted relative to the location specified by root.
+	 * @param $toPath string specifies the destination path including the new name for file or folder. This path is interpreted relative to the location specified by root.
+	 * @param $sandbox bool[optional] mode?
 	 */
 	public function fileopsCopy($fromPath, $toPath, $sandbox = false)
 	{
@@ -1033,13 +1002,12 @@ class Dropbox
 		return $this->doCall($url, $parameters, 'POST');
 	}
 
-
 	/**
 	 * Create a folder relative to the user's Dropbox root or the user's application sandbox folder.
 	 *
-	 * @return	array
-	 * @param	string $path				The path to the new folder to create, relative to root.
-	 * @param	bool[optional] $sandbox		Sandbox mode?
+	 * @return array
+	 * @param $path string path to the new folder to create, relative to root.
+	 * @param $sandbox bool[optional] mode?
 	 */
 	public function fileopsCreateFolder($path, $sandbox = false)
 	{
@@ -1054,13 +1022,12 @@ class Dropbox
 		return $this->doCall($url, $parameters, 'POST');
 	}
 
-
 	/**
 	 * Deletes a file or folder.
 	 *
-	 * @return	array
-	 * @param	string $path				path specifies either a file or folder to be deleted. This path is interpreted relative to the location specified by root.
-	 * @param	bool[optional] $sandbox		Sandbox mode?
+	 * @return array
+	 * @param $path string specifies either a file or folder to be deleted. This path is interpreted relative to the location specified by root.
+	 * @param $sandbox bool[optional] mode?
 	 */
 	public function fileopsDelete($path, $sandbox = false)
 	{
@@ -1075,14 +1042,13 @@ class Dropbox
 		return $this->doCall($url, $parameters, 'POST');
 	}
 
-
 	/**
 	 * Move a file or folder to a new location.
 	 *
-	 * @return	array
-	 * @param	string $fromPath			fromPath specifies either a file or folder to be copied to the location specified by toPath. This path is interpreted relative to the location specified by root.
-	 * @param	string $toPath				toPath specifies the destination path including the new name for file or folder. This path is interpreted relative to the location specified by root.
-	 * @param	bool[optional] $sandbox		Sandbox mode?
+	 * @return array
+	 * @param $fromPath string specifies either a file or folder to be copied to the location specified by toPath. This path is interpreted relative to the location specified by root.
+	 * @param $toPath string specifies the destination path including the new name for file or folder. This path is interpreted relative to the location specified by root.
+	 * @param $sandbox bool[optional] mode?
 	 */
 	public function fileopsMove($fromPath, $toPath, $sandbox = false)
 	{
@@ -1099,14 +1065,10 @@ class Dropbox
 	}
 }
 
-
 /**
  * Dropbox Exception class
  *
- * @author	Tijs Verkoyen <php-dropbox@verkoyen.eu>
+ * @author Tijs Verkoyen <php-dropbox@verkoyen.eu>
  */
 class DropboxException extends Exception
-{
-}
-
-?>
+{}
