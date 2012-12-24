@@ -33,7 +33,7 @@ try {
 //	@todo response = $dropbox->filesPost(BASE_PATH .'with spaces', realpath('../dropbox.php'));
 //	@todo response = $dropbox->filesPost(BASE_PATH .'met spaties/', realpath('/Users/tijs/Projects/dropbox/tests/with spaces.txt'));
 //
-//	@todo response = $dropbox->metadata(BASE_PATH .'met spaties');
+//  $response = $dropbox->metadata(BASE_PATH .'met spaties');
 //	@todo response = $dropbox->thumbnails(BASE_PATH .'image.png');
 //
 //	@todo response = $dropbox->fileopsCopy(BASE_PATH . 'image.png', BASE_PATH . 'copy_' . time());
