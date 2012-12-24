@@ -28,7 +28,7 @@ $dropbox->setOAuthTokenSecret(TOKEN_SECRET);
 try {
 //  $response = $dropbox->accountInfo();
 //
-//	@todo response = $dropbox->filesGet(BASE_PATH .'hàh@, $.txt');
+//  $response = $dropbox->filesGet(BASE_PATH .'hàh@, $.txt');
 //	@todo response = $dropbox->filesPost(BASE_PATH, realpath('../dropbox.php'));
 //	@todo response = $dropbox->filesPost(BASE_PATH .'with spaces', realpath('../dropbox.php'));
 //	@todo response = $dropbox->filesPost(BASE_PATH .'met spaties/', realpath('/Users/tijs/Projects/dropbox/tests/with spaces.txt'));

@@ -700,16 +700,17 @@ class Dropbox
 
     // files & metadata
     /**
-     * Retrieves file contents relative to the user's Dropbox root or the application's directory within the user's Dropbox.
+     * Downloads a file.
      *
+     * @param  string           $path    The path to the file you want to retrieve.
+     * @param  string[optional] $rev     The revision of the file to retrieve. This defaults to the most recent revision.
+     * @param  bool[optional]   $sandbox The root relative to which path is specified. Valid values are sandbox and dropbox.
      * @return string
-     * @param $path string of the directory wherin the file is located.
-     * @param $sandbox bool[optional] mode?
      */
-    public function filesGet($path, $sandbox = false)
+    public function filesGet($path, $rev = null, $sandbox = false)
     {
         // build url
-        $url = '0/files/';
+        $url = '1/files/';
         $url .= ($sandbox) ? 'sandbox/' : 'dropbox/';
         $url .= trim((string) $path, '/');
 
