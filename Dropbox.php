@@ -100,8 +100,8 @@ class Dropbox
     /**
      * Format the parameters as a querystring
      *
-     * @return string
      * @param $parameters array parameters to pass.
+     * @return string
      */
     private function buildQuery(array $parameters)
     {
@@ -127,32 +127,39 @@ class Dropbox
         }
 
         // process parameters
-        foreach($parameters as $key => $value)
+        foreach ($parameters as $key => $value) {
             $chunks[] = $key . '=' . str_replace('%25', '%', $value);
+        }
 
-            // return
+        // return
         return implode('&', $chunks);
     }
 
     /**
-     * All OAuth 1.0 requests use the same basic algorithm for creating a signature base string and a signature.
-     * The signature base string is composed of the HTTP method being used, followed by an ampersand ("&") and then the URL-encoded base URL being accessed,
-     * complete with path (but not query parameters), followed by an ampersand ("&").
-     * Then, you take all query parameters and POST body parameters (when the POST body is of the URL-encoded type, otherwise the POST body is ignored),
-     * including the OAuth parameters necessary for negotiation with the request at hand, and sort them in lexicographical order by first parameter name and
-     * then parameter value (for duplicate parameters), all the while ensuring that both the key and the value for each parameter are URL encoded in isolation.
-     * Instead of using the equals ("=") sign to mark the key/value relationship, you use the URL-encoded form of "%3D". Each parameter is then joined by the
-     * URL-escaped ampersand sign, "%26".
+     * All OAuth 1.0 requests use the same basic algorithm for creating a
+     * signature base string and a signature. The signature base string is
+     * composed of the HTTP method being used, followed by an ampersand ("&")
+     * and then the URL-encoded base URL being accessed, complete with path
+     * (but not query parameters), followed by an ampersand ("&"). Then, you
+     * take all query parameters and POST body parameters (when the POST body is
+     * of the URL-encoded type, otherwise the POST body is ignored), including
+     * the OAuth parameters necessary for negotiation with the request at hand,
+     * and sort them in lexicographical order by first parameter name and then
+     * parameter value (for duplicate parameters), all the while ensuring that
+     * both the key and the value for each parameter are URL encoded in
+     * isolation. Instead of using the equals ("=") sign to mark the key/value
+     * relationship, you use the URL-encoded form of "%3D". Each parameter is
+     * then joined by the URL-escaped ampersand sign, "%26".
      *
+     * @param  string $url        The URL.
+     * @param  string $method     The method to use.
+     * @param  array  $parameters The parameters.
      * @return string
-     * @param $url string url to use.
-     * @param $method string method that will be called.
-     * @param $parameters array parameters to pass.
      */
     private function calculateBaseString($url, $method, array $parameters)
     {
         // redefine
-        $url = str_replace('%20', ' ', (string) $url);
+        $url = (string) $url;
         $parameters = (array) $parameters;
 
         // init var
@@ -160,7 +167,7 @@ class Dropbox
         $chunks = array();
 
         // sort parameters by key
-        uksort($parameters, 'strcmp');
+        ksort($parameters);
 
         // loop parameters
         foreach ($parameters as $key => $value) {
@@ -170,28 +177,15 @@ class Dropbox
 
         // process queries
         foreach ($parameters as $key => $value) {
-            // only add if not already in the url
-            if(substr_count($url, $key . '=' . $value) == 0) $chunks[] = self::urlencode_rfc3986($key) . '%3D' . self::urlencode_rfc3986($value);
+            if ($value !== null) {
+                $chunks[] = self::urlencode_rfc3986($key) . '=' . self::urlencode_rfc3986($value);
+            }
         }
 
-        $urlChunks = explode('/', $url);
-        $i = 0;
-
-        foreach ($urlChunks as &$chunk) {
-            if($i > 4)
-                $chunk = self::urlencode_rfc3986($chunk);
-            else $chunk = urlencode($chunk);
-
-            $i++;
-
-        }
-
-        // build base
+        // buils base
         $base = $method . '&';
-        $base .= implode('%2F', $urlChunks);
-        $base .= (substr_count($url, '?')) ? '%26' : '&';
-        $base .= implode('%26', $chunks);
-        $base = str_replace(array('%3F', '%20'), array('&', '%2520'), $base);
+        $base .= self::urlencode_rfc3986($url) . '&';
+        $base .= self::urlencode_rfc3986(implode('&', $chunks));
 
         // return
         return $base;
@@ -199,10 +193,11 @@ class Dropbox
 
     /**
      * Build the Authorization header
+     * @later: fix me
      *
+     * @param  array  $parameters The parameters.
+     * @param  string $url        The URL.
      * @return string
-     * @param $parameters array parameters to pass.
-     * @param $url string url to use.
      */
     private function calculateHeader(array $parameters, $url)
     {
@@ -216,12 +211,16 @@ class Dropbox
         $chunks = array();
 
         // process queries
-        foreach($parameters as $key => $value)
-            $chunks[] = str_replace('%25', '%', self::urlencode_rfc3986($key) . '="' . self::urlencode_rfc3986($value) . '"');
+        foreach ($parameters as $key => $value) {
+            $chunks[] = str_replace(
+                '%25', '%',
+                self::urlencode_rfc3986($key) . '="' . self::urlencode_rfc3986($value) . '"'
+            );
+        }
 
-            // build return
-        $return = 'Authorization: OAuth realm="' . $parts['scheme'] . '://' . $parts['host'] . $parts['path'] . '", ';
-        $return .= implode(',', $chunks);
+        // build return
+        $return = 'Authorization: OAuth ';
+        $return .= implode(', ', $chunks);
 
         // prepend name and OAuth part
         return $return;
@@ -229,6 +228,7 @@ class Dropbox
 
     /**
      * Make an call to the oAuth
+     * @todo	refactor me
      *
      * @todo refactor me
      * @return array
@@ -255,12 +255,9 @@ class Dropbox
         // add sign into the parameters
         $parameters['oauth_signature'] = $this->hmacsha1($this->getApplicationSecret() . '&' . $this->getOAuthTokenSecret(), $base);
 
-        // calculate header
-        $header = $this->calculateHeader($parameters, self::API_URL . '/' . $url);
-
         if ($method == 'POST') {
             $options[CURLOPT_POST] = true;
-            $options[CURLOPT_POSTFIELDS] = $this->buildQuery($parameters);
+            $options[CURLOPT_POSTFIELDS] = $parameters;
         } else {
             // reset post
             $options[CURLOPT_POST] = 0;
@@ -274,7 +271,9 @@ class Dropbox
         $options[CURLOPT_URL] = self::API_URL . '/' . $url;
         $options[CURLOPT_PORT] = self::API_PORT;
         $options[CURLOPT_USERAGENT] = $this->getUserAgent();
-        if(ini_get('open_basedir') == '' && ini_get('safe_mode' == 'Off')) $options[CURLOPT_FOLLOWLOCATION] = true;
+        if (ini_get('open_basedir') == '' && ini_get('safe_mode' == 'Off')) {
+            $options[CURLOPT_FOLLOWLOCATION] = true;
+        }
         $options[CURLOPT_RETURNTRANSFER] = true;
         $options[CURLOPT_TIMEOUT] = (int) $this->getTimeOut();
         $options[CURLOPT_SSL_VERIFYPEER] = false;
@@ -342,10 +341,11 @@ class Dropbox
         $data = $oauth;
         if (!empty($parameters)) {
             // convert to UTF-8
-            foreach($parameters as &$value)
+            foreach ($parameters as &$value) {
                 $value = utf8_encode($value);
+            }
 
-                // merge
+            // merge
             $data = array_merge($data, $parameters);
         }
 
@@ -407,9 +407,11 @@ class Dropbox
         // add sign into the parameters
         $oauth['oauth_signature'] = $this->hmacsha1($this->getApplicationSecret() . '&' . $this->getOAuthTokenSecret(), $base);
 
-        if($isContent)
+        if ($isContent) {
             $headers[] = $this->calculateHeader($oauth, self::API_CONTENT_URL . '/' . $url);
-        else $headers[] = $this->calculateHeader($oauth, self::API_URL . '/' . $url);
+        } else {
+            $headers[] = $this->calculateHeader($oauth, self::API_URL . '/' . $url);
+        }
         $headers[] = 'Expect:';
 
         // set options
@@ -418,7 +420,9 @@ class Dropbox
         else $options[CURLOPT_URL] = self::API_URL . '/' . $url;
         $options[CURLOPT_PORT] = self::API_PORT;
         $options[CURLOPT_USERAGENT] = $this->getUserAgent();
-        if(ini_get('open_basedir') == '' && ini_get('safe_mode' == 'Off')) $options[CURLOPT_FOLLOWLOCATION] = true;
+        if (ini_get('open_basedir') == '' && ini_get('safe_mode' == 'Off')) {
+            $options[CURLOPT_FOLLOWLOCATION] = true;
+        }
         $options[CURLOPT_RETURNTRANSFER] = true;
         $options[CURLOPT_TIMEOUT] = (int) $this->getTimeOut();
         $options[CURLOPT_SSL_VERIFYPEER] = false;
@@ -650,7 +654,7 @@ class Dropbox
      */
     private function hmacsha1($key, $data)
     {
-        return base64_encode(hash_hmac('SHA1', $data, $key, true));
+        return base64_encode(hash_hmac('sha1', $data, $key, true));
     }
 
     /**
@@ -661,29 +665,25 @@ class Dropbox
      */
     private static function urlencode_rfc3986($value)
     {
-        if(is_array($value))
-
+        if (is_array($value)) {
             return array_map(array(__CLASS__, 'urlencode_rfc3986'), $value);
-        else {
-            $search = array('+', ' ', '%7E', '%');
-            $replace = array('%20', '%20', '~', '%25');
-
-            return str_replace($search, $replace, rawurlencode($value));
+        } else {
+            return str_replace('%7E', '~', rawurlencode($value));
         }
     }
 
     // oauth resources
     /**
-     * Call for obtaining an OAuth request token.
-     * Returns a request token and the corresponding request token secret. This token and secret cannot be used to sign requests for the /metadata and /file content API calls.
-     * Their only purpose is for signing a request to oauth/access_token once the user has gone through the application authorization steps provided by oauth/authorize.
+     * Step 1 of authentication. Obtain an OAuth request token to be used for the rest of the authentication process.
+     * This method corresponds to Obtaining an Unauthorized Request Token in the OAuth Core 1.0 specification.
+     * A request token and the corresponding request token secret, URL-encoded. This token/secret pair is meant to be used with /oauth/access_token to complete the authentication process and cannot be used for any other API calls. See Service Provider Issues an Unauthorized Request Token in the OAuth Core 1.0 specification for additional discussion of the values returned when fetching a request token.
      *
      * @return array
      */
     public function oAuthRequestToken()
     {
         // make the call
-        $response = $this->doOAuthCall('0/oauth/request_token', null, 'POST', false);
+        $response = $this->doOAuthCall('1/oauth/request_token', null, 'POST', false);
 
         // process response
         $response = (array) explode('&', $response);
@@ -703,26 +703,23 @@ class Dropbox
     }
 
     /**
-     * Redirect the user to the oauth/authorize location so that Dropbox can authenticate the user and ask whether or not the user wants to authorize the application to access
-     * file metadata and content on its behalf.
-     * oauth/authorize is not an API call per se, because it does not have a return value, but rather directs the user to a page on
-     * api.dropbox.com where they are provided means to log in to Dropbox and grant authority to the application requesting it.
-     * The page served by oauth/authorize should be presented to the user through their web browser.
-     * Please note, without directing the user to a Dropbox-provided page via oauth/authorize, it is impossible for your application to use the request token it received
-     * via oauth/request_token to obtain an access token from oauth/access_token.
+     * Step 2 of authentication. Applications should direct the user to /oauth/authorize. This isn't an API call per se, but rather a web endpoint that lets the user sign in to Dropbox and choose whether to grant the application the ability to access files on their behalf. The page served by /oauth/authorize should be presented to the user through their web browser. Without the user's authorization in this step, it isn't possible for your application to obtain an access token from /oauth/access_token.
+     * This method corresponds to Obtaining User Authorization in the OAuth Core 1.0 specification.
      *
-     * @param $oauthToken string request token of the application requesting authority from a user.
-     * @param $oauthCallback string[optional] the user authorizes an application, the user is redirected to the application-served URL provided by this parameter.
+     * @param string           $oauthToken    The request token obtained via /oauth/request_token.
+     * @param string[optional] $oauthCallback After the either decides to authorize or disallow your application, they are redirected to this URL.
+     * @param string[optional] $locale        If the locale specified is a supported language, Dropbox will direct users to a translated version of the authorization website. See https://www.dropbox.com/help/31/en for more information about supported locales.
      */
-    public function oAuthAuthorize($oauthToken, $oauthCallback = null)
+    public function oAuthAuthorize($oauthToken, $oauthCallback = null, $locale = null)
     {
         // build parameters
         $parameters = array();
         $parameters['oauth_token'] = (string) $oauthToken;
         if($oauthCallback !== null) $parameters['oauth_callback'] = (string) $oauthCallback;
+        if($locale !== null) $parameters['locale'] = (string) $locale;
 
         // build url
-        $url = self::API_AUTH_URL . '/0/oauth/authorize?' . http_build_query($parameters);
+        $url = self::API_AUTH_URL . '/1/oauth/authorize?' . http_build_query($parameters);
 
         // redirect
         header('Location: ' . $url);
@@ -730,8 +727,8 @@ class Dropbox
     }
 
     /**
-     * This call returns a access token and the corresponding access token secret.
-     * Upon return, the authorization process is now complete and the access token and corresponding secret are used to sign requests for the metadata and file content API calls.
+     * Step 3 of authentication. After the /oauth/authorize step is complete, the application can call /oauth/access_token to acquire an access token.
+     * This method corresponds to Obtaining an Access Token in the OAuth Core 1.0 specification.
      *
      * @return array
      * @param $oauthToken string token returned after authorizing.
@@ -743,7 +740,13 @@ class Dropbox
         $parameters['oauth_token'] = (string) $oauthToken;
 
         // make the call
-        $response = $this->doOAuthCall('0/oauth/access_token', $parameters, 'POST', false);
+        $response = $this->doOAuthCall('1/oauth/access_token', $parameters, 'POST', false);
+
+        // validate
+        $json = @json_decode($response, true);
+        if (isset($json['error'])) {
+            throw new Exception($json['error']);
+        }
 
         // process response
         $response = (array) explode('&', $response);
