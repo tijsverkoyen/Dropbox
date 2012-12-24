@@ -791,20 +791,24 @@ class Dropbox
     /**
      * Copy a file or folder to a new location.
      *
+     * @param  string[optional] $fromPath    Specifies the file or folder to be copied from relative to root.
+     * @param  string           $toPath      Specifies the destination path, including the new name for the file or folder, relative to root.
+     * @param  string[optional] $fromCopyRef Specifies a copy_ref generated from a previous /copy_ref call. Must be used instead of the from_path parameter.
+     * @param  string[optional] $locale      The metadata returned will have its size field translated based on the given locale.
+     * @param  bool[optional]   $sandbox     The metadata returned will have its size field translated based on the given locale.
      * @return array
-     * @param $fromPath string specifies either a file or folder to be copied to the location specified by toPath. This path is interpreted relative to the location specified by root.
-     * @param $toPath string specifies the destination path including the new name for file or folder. This path is interpreted relative to the location specified by root.
-     * @param $sandbox bool[optional] mode?
      */
-    public function fileopsCopy($fromPath, $toPath, $sandbox = false)
+    public function fileopsCopy($fromPath = null, $toPath, $fromCopyRef = null, $locale = null, $sandbox = false)
     {
         // build url
-        $url = '0/fileops/copy';
+        $url = '1/fileops/copy';
 
         // build parameters
-        $parameters['from_path'] = (string) $fromPath;
-        $parameters['to_path'] = (string) $toPath;
         $parameters['root'] = ($sandbox) ? 'sandbox' : 'dropbox';
+        if($fromPath !== null) $parameters['from_path'] = (string) $fromPath;
+        $parameters['to_path'] = (string) $toPath;
+        if($fromCopyRef !== null) $parameters['from_copy_ref'] = (string) $fromCopyRef;
+        if($locale !== null) $parameters['locale'] = (string) $locale;
 
         // make the call
         return $this->doCall($url, $parameters, 'POST');
