@@ -31,15 +31,12 @@ try {
 //  $response = $dropbox->filesGet(BASE_PATH .'hàh@, $.txt');
 //	@todo $response = $dropbox->filesPut();
 //  $response = $dropbox->filesPost(BASE_PATH .'met spaties/', realpath(dirname(__FILE__)) . '/with spaces.txt', true);
-//	@todo response = $dropbox->filesPost(BASE_PATH, realpath('../dropbox.php'));
-//	@todo response = $dropbox->filesPost(BASE_PATH .'with spaces', realpath('../dropbox.php'));
-//	@todo response = $dropbox->filesPost(BASE_PATH .'met spaties/', realpath('/Users/tijs/Projects/dropbox/tests/with spaces.txt'));
 //
 //  $response = $dropbox->metadata(BASE_PATH .'met spaties');
 //  $response = $dropbox->thumbnails(BASE_PATH .'image.png');
 //
-//	@todo response = $dropbox->fileopsCopy(BASE_PATH . 'image.png', BASE_PATH . 'copy_' . time());
-//	@todo response = $dropbox->fileopsCreateFolder(BASE_PATH .'created_'. time());
+//  $response = $dropbox->fileopsCopy(BASE_PATH . 'image.png', BASE_PATH . 'copy_' . time());
+//  $response = $dropbox->fileopsCreateFolder(BASE_PATH .'created_'. time());
 //	@todo response = $dropbox->fileopsDelete(BASE_PATH .'will_be_deleted');
 //	@todo response = $dropbox->fileopsMove(BASE_PATH .'will_be_moved', BASE_PATH .'moved_'. time());
 } catch (Exception $e) {

@@ -819,17 +819,19 @@ class Dropbox
      * Create a folder relative to the user's Dropbox root or the user's application sandbox folder.
      *
      * @return array
-     * @param $path string path to the new folder to create, relative to root.
-     * @param $sandbox bool[optional] mode?
+     * @param  string           $path    The path to the new folder to create relative to root.
+     * @param  string[optional] $locale  The metadata returned will have its size field translated based on the given locale.
+     * @param  bool[optional]   $sandbox The metadata returned will have its size field translated based on the given locale.
      */
-    public function fileopsCreateFolder($path, $sandbox = false)
+    public function fileopsCreateFolder($path, $locale = null, $sandbox = false)
     {
         // build url
-        $url = '0/fileops/create_folder';
+        $url = '1/fileops/create_folder';
 
         // build parameters
         $parameters['path'] = trim((string) $path, '/');
         $parameters['root'] = ($sandbox) ? 'sandbox' : 'dropbox';
+        if($locale !== null) $parameters['locale'] = (string) $locale;
 
         // make the call
         return $this->doCall($url, $parameters, 'POST');
