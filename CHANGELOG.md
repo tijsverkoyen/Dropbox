@@ -1,7 +1,8 @@
 # Changelog since 1.0.6
 
-* Made it compliant with PSR
-* Made the class available through composer
+* Made it compliant with PSR.
+* Made the class available through composer.
+* Made the class work with version 1 of the API.
 
 # Changelog since 1.0.5
 
