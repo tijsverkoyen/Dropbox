@@ -303,7 +303,7 @@ class Dropbox
 		$errorMessage = curl_error($this->curl);
 
 		// error?
-		if($errorNumber != '') throw new DropboxException($errorMessage, $errorNumber);
+		if($errorNumber != '') throw new Exception($errorMessage, $errorNumber);
 
 		// return
 		if($expectJSON) return json_decode($response, true);
@@ -335,7 +335,7 @@ class Dropbox
 		$expectJSON = (bool) $expectJSON;
 
 		// validate method
-		if(!in_array($method, $allowedMethods)) throw new DropboxException('Unknown method (' . $method . '). Allowed methods are: ' . implode(', ', $allowedMethods));
+		if(!in_array($method, $allowedMethods)) throw new Exception('Unknown method (' . $method . '). Allowed methods are: ' . implode(', ', $allowedMethods));
 
 		// append default parameters
 		$oauth['oauth_consumer_key'] = $this->getApplicationKey();
@@ -458,7 +458,7 @@ class Dropbox
 		{
 			// is it JSON?
 			$json = @json_decode($response, true);
-			if($json !== false && isset($json['error'])) throw new DropboxException($json['error']);
+			if($json !== false && isset($json['error'])) throw new Exception($json['error']);
 
 			// set return
 			$return['content_type'] = $headers['content_type'];
@@ -500,7 +500,7 @@ class Dropbox
 			}
 
 			// throw exception
-			throw new DropboxException('Invalid response.');
+			throw new Exception('Invalid response.');
 		}
 
 		// any error
@@ -529,7 +529,7 @@ class Dropbox
 			else $message = 'Invalid response.';
 
 			// throw exception
-			throw new DropboxException($message);
+			throw new Exception($message);
 		}
 
 		// return
@@ -1025,11 +1025,3 @@ class Dropbox
 		return $this->doCall($url, $parameters, 'POST');
 	}
 }
-
-/**
- * Dropbox Exception class
- *
- * @author Tijs Verkoyen <php-dropbox@verkoyen.eu>
- */
-class DropboxException extends Exception
-{}
