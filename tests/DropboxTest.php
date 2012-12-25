@@ -230,6 +230,16 @@ class DropboxTest extends PHPUnit_Framework_TestCase
     }
 
     /**
+     * Tests Dropbox->media()
+     */
+    public function testMedia()
+    {
+        $response = $this->dropbox->media(BASE_PATH .'hàh@, $.txt');
+        $this->assertArrayHasKey('url', $response);
+        $this->assertArrayHasKey('expires', $response);
+    }
+
+    /**
      * Tests Dropbox->thumbnails()
      */
     public function testThumbnails()

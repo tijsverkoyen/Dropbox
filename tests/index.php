@@ -37,6 +37,7 @@ try {
 //  $response = $dropbox->restore(BASE_PATH .'hàh@, $.txt', '368c7df600088e34');
 //  $response = $dropbox->search(BASE_PATH, 'txt');
 //  $response = $dropbox->shares(BASE_PATH);
+//  $response = $dropbox->media(BASE_PATH .'hàh@, $.txt');
 //  $response = $dropbox->thumbnails(BASE_PATH .'image.png');
 //
 //  $response = $dropbox->fileopsCopy(BASE_PATH . 'image.png', BASE_PATH . 'copy_' . time());

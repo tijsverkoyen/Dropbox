@@ -5,6 +5,7 @@
 * Implemented restore-method.
 * Implemented search-method.
 * Implemented shares-method.
+* Implemented media-method.
 
 # Changelog since 1.0.6
 

@@ -890,6 +890,29 @@ class Dropbox
     }
 
     /**
+     * Returns a link directly to a file.
+     *
+     * @param  string           $path    The path to the file.
+     * @param  string[optional] $locale  The metadata returned will have its size field translated based on the given locale.
+     * @param  bool[optional]   $sandbox The root relative to which path is specified. Valid values are sandbox and dropbox.
+     * @return array
+     */
+    public function media($path, $locale = null, $sandbox = false)
+    {
+        // build url
+        $url = '1/shares/';
+        $url .= ($sandbox) ? 'sandbox/' : 'dropbox/';
+        $url .= trim((string) $path, '/');
+
+        // build parameters
+        $parameters = null;
+        if($locale !== null) $parameters['locale'] = (string) $locale;
+
+        // make the call
+        return (array) $this->doCall($url, $parameters, 'POST');
+    }
+
+    /**
      * Gets a thumbnail for an image.
      *
      * @param  string[optional] $path    The path to the file or folder.
