@@ -792,7 +792,7 @@ class Dropbox
      * @param  string           $path     The path to the file.
      * @param  int[optional]    $revLimit Default is 10. Max is 1,000. When listing a file, the service will not report listings containing more than the amount specified and will instead respond with a 406 (Not Acceptable) status response.
      * @param  string[optional] $locale   The metadata returned will have its size field translated based on the given locale.
-     * @param  bool[optional]   $sandbox  The metadata returned will have its size field translated based on the given locale.
+     * @param  bool[optional]   $sandbox  The root relative to which path is specified. Valid values are sandbox and dropbox.
      * @return array
      */
     public function revisions($path, $revLimit = 10, $locale = null, $sandbox = false)
@@ -805,6 +805,31 @@ class Dropbox
         // build parameters
         $parameters = null;
         if($revLimit !== null) $parameters['rev_limit'] = (int) $revLimit;
+        if($locale !== null) $parameters['locale'] = (string) $locale;
+
+        // make the call
+        return (array) $this->doCall($url, $parameters);
+    }
+
+    /**
+     * Restores a file path to a previous revision.
+     * Unlike downloading a file at a given revision and then re-uploading it, this call is atomic. It also saves a bunch of bandwidth.
+     *
+     * @param  string           $path    The path to the file.
+     * @param  string           $rev     The revision of the file to restore.
+     * @param  string[optional] $locale  The metadata returned will have its size field translated based on the given locale.
+     * @param  bool[optional]   $sandbox The root relative to which path is specified. Valid values are sandbox and dropbox.
+     * @return array
+     */
+    public function restore($path, $rev, $locale = null, $sandbox = false)
+    {
+        // build url
+        $url = '1/restore/';
+        $url .= ($sandbox) ? 'sandbox/' : 'dropbox/';
+        $url .= trim((string) $path, '/');
+
+        // build parameters
+        $parameters['rev'] = (string) $rev;
         if($locale !== null) $parameters['locale'] = (string) $locale;
 
         // make the call

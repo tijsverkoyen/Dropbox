@@ -43,6 +43,39 @@ class DropboxTest extends PHPUnit_Framework_TestCase
     }
 
     /**
+     * Check if an item is a file
+     * @param $item
+     */
+    private function isFile($item)
+    {
+        $this->assertInternalType('array', $item);
+        $this->assertArrayHasKey('revision', $item);
+        $this->assertInternalType('int', $item['revision']);
+        $this->assertArrayHasKey('rev', $item);
+        $this->assertInternalType('string', $item['rev']);
+        $this->assertArrayHasKey('thumb_exists', $item);
+        $this->assertInternalType('bool', $item['thumb_exists']);
+        $this->assertArrayHasKey('bytes', $item);
+        $this->assertInternalType('int', $item['bytes']);
+        $this->assertArrayHasKey('modified', $item);
+        $this->assertInternalType('string', $item['modified']);
+        $this->assertArrayHasKey('client_mtime', $item);
+        $this->assertInternalType('string', $item['client_mtime']);
+        $this->assertArrayHasKey('path', $item);
+        $this->assertInternalType('string', $item['path']);
+        $this->assertArrayHasKey('is_dir', $item);
+        $this->assertInternalType('bool', $item['is_dir']);
+        $this->assertArrayHasKey('icon', $item);
+        $this->assertInternalType('string', $item['icon']);
+        $this->assertArrayHasKey('root', $item);
+        $this->assertInternalType('string', $item['root']);
+        $this->assertArrayHasKey('mime_type', $item);
+        $this->assertInternalType('string', $item['mime_type']);
+        $this->assertArrayHasKey('size', $item);
+        $this->assertInternalType('string', $item['size']);
+    }
+
+    /**
      * Tests Dropbox->getTimeOut()
      */
     public function testGetTimeOut()
@@ -145,6 +178,16 @@ class DropboxTest extends PHPUnit_Framework_TestCase
             $this->assertArrayHasKey('mime_type', $row);
             $this->assertArrayHasKey('size', $row);
         }
+    }
+
+    /**
+     * Tests Dropbox->restore()
+     */
+    public function testRestore()
+    {
+        $response = $this->dropbox->restore(BASE_PATH .'hàh@, $.txt', '368c7df600088e34');
+        $this->assertInternalType('array', $response);
+        $this->isFile($response);
     }
 
     /**

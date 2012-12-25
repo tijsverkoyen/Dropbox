@@ -2,6 +2,7 @@
 
 * Implemented delta-method.
 * Implemented revisions-method.
+* Implemented restore-method.
 
 # Changelog since 1.0.6
 
