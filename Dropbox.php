@@ -837,6 +837,35 @@ class Dropbox
     }
 
     /**
+     * Returns metadata for all files and folders whose filename contains the given search string as a substring.
+     * Searches are limited to the folder path and its sub-folder hierarchy provided in the call.
+     *
+     * @param  string           $path           The path to the file.
+     * @param  string           $query          The search string. Must be at least three characters long.
+     * @param  int[optional]    $fileLimit      The maximum and default value is 1,000. No more than file_limit search results will be returned.
+     * @param  bool[optional]   $includeDeleted If this parameter is set to true, then files and folders that have been deleted will also be included in the search.
+     * @param  string[optional] $locale         The metadata returned will have its size field translated based on the given locale.
+     * @param  bool[optional]   $sandbox        The root relative to which path is specified. Valid values are sandbox and dropbox.
+     * @return array
+     */
+    public function search($path, $query, $fileLimit = 1000, $includeDeleted = null, $locale = null, $sandbox = false)
+    {
+        // build url
+        $url = '1/search/';
+        $url .= ($sandbox) ? 'sandbox/' : 'dropbox/';
+        $url .= trim((string) $path, '/');
+
+        // build parameters
+        $parameters['query'] = (string) $query;
+        $parameters['file_limit'] = (int) $fileLimit;
+        if($includeDeleted !== null) $parameters['include_deleted'] = ((bool) $includeDeleted) ? 'true' : 'false';
+        if($locale !== null) $parameters['locale'] = (string) $locale;
+
+        // make the call
+        return (array) $this->doCall($url, $parameters);
+    }
+
+    /**
      * Gets a thumbnail for an image.
      *
      * @param  string[optional] $path    The path to the file or folder.

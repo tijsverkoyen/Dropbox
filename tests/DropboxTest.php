@@ -209,6 +209,17 @@ class DropboxTest extends PHPUnit_Framework_TestCase
     }
 
     /**
+     * Tests Dropbox->search()
+     */
+    public function testSearch()
+    {
+        $response = $this->dropbox->search(BASE_PATH, 'txt');
+        foreach ($response as $row) {
+            $this->isFile($row);
+        }
+    }
+
+    /**
      * Tests Dropbox->thumbnails()
      */
     public function testThumbnails()
