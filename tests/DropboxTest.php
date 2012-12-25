@@ -43,14 +43,45 @@ class DropboxTest extends PHPUnit_Framework_TestCase
     }
 
     /**
+     * Check if an item is a directory
+     * @param $item
+     */
+    private function isDir($item)
+    {
+        $this->assertInternalType('array', $item);
+        $this->assertArrayHasKey('size', $item);
+        $this->assertInternalType('string', $item['size']);
+        $this->assertArrayHasKey('hash', $item);
+        $this->assertInternalType('string', $item['hash']);
+        $this->assertArrayHasKey('bytes', $item);
+        $this->assertInternalType('int', $item['bytes']);
+        $this->assertArrayHasKey('thumb_exists', $item);
+        $this->assertInternalType('bool', $item['thumb_exists']);
+        $this->assertArrayHasKey('rev', $item);
+        $this->assertArrayHasKey('modified', $item);
+        $this->assertInternalType('string', $item['modified']);
+        $this->assertArrayHasKey('path', $item);
+        $this->assertInternalType('string', $item['path']);
+        $this->assertArrayHasKey('is_dir', $item);
+        $this->assertInternalType('bool', $item['is_dir']);
+        $this->assertTrue($item['is_dir']);
+        $this->assertArrayHasKey('icon', $item);
+        $this->assertInternalType('string', $item['icon']);
+        $this->assertArrayHasKey('root', $item);
+        $this->assertInternalType('string', $item['root']);
+        $this->assertArrayHasKey('revision', $item);
+        $this->assertInternalType('int', $item['revision']);
+    }
+
+    /**
      * Check if an item is a file
      * @param $item
      */
     private function isFile($item)
     {
         $this->assertInternalType('array', $item);
-        $this->assertArrayHasKey('revision', $item);
-        $this->assertInternalType('int', $item['revision']);
+        $this->assertArrayHasKey('size', $item);
+        $this->assertInternalType('string', $item['size']);
         $this->assertArrayHasKey('rev', $item);
         $this->assertInternalType('string', $item['rev']);
         $this->assertArrayHasKey('thumb_exists', $item);
@@ -65,14 +96,15 @@ class DropboxTest extends PHPUnit_Framework_TestCase
         $this->assertInternalType('string', $item['path']);
         $this->assertArrayHasKey('is_dir', $item);
         $this->assertInternalType('bool', $item['is_dir']);
+        $this->assertFalse($item['is_dir']);
         $this->assertArrayHasKey('icon', $item);
         $this->assertInternalType('string', $item['icon']);
         $this->assertArrayHasKey('root', $item);
         $this->assertInternalType('string', $item['root']);
         $this->assertArrayHasKey('mime_type', $item);
         $this->assertInternalType('string', $item['mime_type']);
-        $this->assertArrayHasKey('size', $item);
-        $this->assertInternalType('string', $item['size']);
+        $this->assertArrayHasKey('revision', $item);
+        $this->assertInternalType('int', $item['revision']);
     }
 
     /**
@@ -134,12 +166,7 @@ class DropboxTest extends PHPUnit_Framework_TestCase
     public function testMetadata()
     {
         $response = $this->dropbox->metadata(BASE_PATH);
-
-        $this->assertArrayHasKey('hash', $response);
-        $this->assertArrayHasKey('revision', $response);
-        $this->assertArrayHasKey('modified', $response);
-        $this->assertArrayHasKey('path', $response);
-        $this->assertArrayHasKey('contents', $response);
+        $this->isDir($response);
     }
 
     /**
@@ -168,15 +195,7 @@ class DropboxTest extends PHPUnit_Framework_TestCase
         $response = $this->dropbox->revisions(BASE_PATH .'hàh@, $.txt');
         $this->assertInternalType('array', $response);
         foreach ($response as $row) {
-            $this->assertArrayHasKey('revision', $row);
-            $this->assertArrayHasKey('rev', $row);
-            $this->assertArrayHasKey('bytes', $row);
-            $this->assertArrayHasKey('modified', $row);
-            $this->assertArrayHasKey('path', $row);
-            $this->assertArrayHasKey('is_dir', $row);
-            $this->assertArrayHasKey('root', $row);
-            $this->assertArrayHasKey('mime_type', $row);
-            $this->assertArrayHasKey('size', $row);
+            $this->isFile($row);
         }
     }
 
@@ -186,7 +205,6 @@ class DropboxTest extends PHPUnit_Framework_TestCase
     public function testRestore()
     {
         $response = $this->dropbox->restore(BASE_PATH .'hàh@, $.txt', '368c7df600088e34');
-        $this->assertInternalType('array', $response);
         $this->isFile($response);
     }
 
@@ -207,12 +225,7 @@ class DropboxTest extends PHPUnit_Framework_TestCase
     public function testFileopsCopy()
     {
         $response = $this->dropbox->fileopsCopy(BASE_PATH . 'image.png', BASE_PATH . 'copy.png');
-
-        $this->assertArrayHasKey('revision', $response);
-        $this->assertArrayHasKey('modified', $response);
-        $this->assertArrayHasKey('path', $response);
-
-        // cleanup
+        $this->isFile($response);
         $this->dropbox->fileopsDelete(BASE_PATH . 'copy.png');
     }
 
@@ -222,12 +235,7 @@ class DropboxTest extends PHPUnit_Framework_TestCase
     public function testFileopsCreateFolder()
     {
         $response = $this->dropbox->fileopsCreateFolder(BASE_PATH . 'created');
-
-        $this->assertArrayHasKey('revision', $response);
-        $this->assertArrayHasKey('modified', $response);
-        $this->assertArrayHasKey('path', $response);
-
-        // cleanup
+        $this->isDir($response);
         $this->dropbox->fileopsDelete(BASE_PATH . 'created');
     }
 
@@ -237,15 +245,8 @@ class DropboxTest extends PHPUnit_Framework_TestCase
     public function testFileopsMove()
     {
         $this->dropbox->fileopsCreateFolder(BASE_PATH . 'will_be_moved');
-
         $response = $this->dropbox->fileopsMove(BASE_PATH . 'will_be_moved', BASE_PATH . 'moved');
-
-        $this->assertArrayHasKey('hash', $response);
-        $this->assertArrayHasKey('revision', $response);
-        $this->assertArrayHasKey('modified', $response);
-        $this->assertArrayHasKey('path', $response);
-
-        // cleanup
+        $this->isDir($response);
         $this->dropbox->fileopsDelete(BASE_PATH . 'moved');
     }
 }
