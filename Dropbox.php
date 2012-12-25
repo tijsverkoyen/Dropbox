@@ -913,6 +913,24 @@ class Dropbox
     }
 
     /**
+     * Creates and returns a copy_ref to a file. This reference string can be used to copy that file to another user's Dropbox by passing it in as the fromCopyRef parameter on fileopsCopy.
+     *
+     * @param  string         $path    The path to the file.
+     * @param  bool[optional] $sandbox The root relative to which path is specified. Valid values are sandbox and dropbox.
+     * @return array
+     */
+    public function copyRef($path, $sandbox = false)
+    {
+        // build url
+        $url = '1/copy_ref/';
+        $url .= ($sandbox) ? 'sandbox/' : 'dropbox/';
+        $url .= trim((string) $path, '/');
+
+        // make the call
+        return (array) $this->doCall($url);
+    }
+
+    /**
      * Gets a thumbnail for an image.
      *
      * @param  string[optional] $path    The path to the file or folder.

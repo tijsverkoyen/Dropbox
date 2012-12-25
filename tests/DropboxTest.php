@@ -240,6 +240,16 @@ class DropboxTest extends PHPUnit_Framework_TestCase
     }
 
     /**
+     * Tests Dropbox->copyRef()
+     */
+    public function testCopyRef()
+    {
+        $response = $this->dropbox->copyRef(BASE_PATH .'hàh@, $.txt');
+        $this->assertArrayHasKey('copy_ref', $response);
+        $this->assertArrayHasKey('expires', $response);
+    }
+
+    /**
      * Tests Dropbox->thumbnails()
      */
     public function testThumbnails()

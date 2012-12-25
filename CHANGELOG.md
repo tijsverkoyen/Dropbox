@@ -6,6 +6,7 @@
 * Implemented search-method.
 * Implemented shares-method.
 * Implemented media-method.
+* Implemented copyRef-method.
 
 # Changelog since 1.0.6
 
