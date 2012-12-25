@@ -764,6 +764,27 @@ class Dropbox
         return (array) $this->doCall($url, $parameters);
     }
 
+	/**
+	 * A way of letting you keep up with changes to files and folders in a user's Dropbox. You can periodically call /delta to get a list of "delta entries", which are instructions on how to update your local state to match the server's state.
+	 *
+	 * @param string[optional] $cursor	A string that is used to keep track of your current state. On the next call pass in this value to return delta entries that have been recorded since the cursor was returned.
+	 * @param string[optional] $locale	The metadata returned will have its size field translated based on the given locale.
+	 * @return array
+	 */
+	public function delta($cursor = null, $locale = null)
+	{
+		// build url
+		$url = '1/delta';
+
+		// build parameters
+		$parameters = null;
+		$parameters['cursor'] = (string) $cursor;
+		if($locale !== null) $parameters['locale'] = (string) $locale;
+
+		// make the call
+		return (array) $this->doCall($url, $parameters, 'POST');
+	}
+
     /**
      * Gets a thumbnail for an image.
      *

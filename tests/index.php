@@ -29,10 +29,10 @@ try {
 //  $response = $dropbox->accountInfo();
 //
 //  $response = $dropbox->filesGet(BASE_PATH .'hàh@, $.txt');
-//	@todo $response = $dropbox->filesPut();
 //  $response = $dropbox->filesPost(BASE_PATH .'with spaces/', realpath(dirname(__FILE__)) . '/with spaces.txt', true);
 //
 //  $response = $dropbox->metadata(BASE_PATH .'met spaties');
+//  $response = $dropbox->delta();
 //  $response = $dropbox->thumbnails(BASE_PATH .'image.png');
 //
 //  $response = $dropbox->fileopsCopy(BASE_PATH . 'image.png', BASE_PATH . 'copy_' . time());

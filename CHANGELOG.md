@@ -1,3 +1,7 @@
+# Changelog since 1.1.0
+
+* Implemented delta.
+
 # Changelog since 1.0.6
 
 * Made it compliant with PSR.
