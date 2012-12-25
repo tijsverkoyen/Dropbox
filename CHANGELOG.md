@@ -1,6 +1,7 @@
 # Changelog since 1.1.0
 
-* Implemented delta.
+* Implemented delta-method.
+* Implemented revisions-method.
 
 # Changelog since 1.0.6
 

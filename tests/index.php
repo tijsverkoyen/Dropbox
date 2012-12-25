@@ -33,6 +33,7 @@ try {
 //
 //  $response = $dropbox->metadata(BASE_PATH .'met spaties');
 //  $response = $dropbox->delta();
+//  $response = $dropbox->revisions(BASE_PATH .'hàh@, $.txt');
 //  $response = $dropbox->thumbnails(BASE_PATH .'image.png');
 //
 //  $response = $dropbox->fileopsCopy(BASE_PATH . 'image.png', BASE_PATH . 'copy_' . time());

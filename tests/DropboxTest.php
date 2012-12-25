@@ -109,24 +109,43 @@ class DropboxTest extends PHPUnit_Framework_TestCase
         $this->assertArrayHasKey('contents', $response);
     }
 
-	/**
-	 * Tests Dropbox->delta()
-	 */
-	public function testDelta()
-	{
-		$response = $this->dropbox->delta();
-		$this->assertInternalType('array', $response);
-		$this->assertArrayHasKey('reset', $response);
-		$this->assertInternalType('bool', $response['reset']);
-		$this->assertArrayHasKey('cursor', $response);
-		$this->assertArrayHasKey('has_more', $response);
-		$this->assertInternalType('bool', $response['has_more']);
-		$this->assertArrayHasKey('entries', $response);
-		foreach($response['entries'] as $row)
-		{
-			$this->assertInternalType('array', $row);
-		}
-	}
+    /**
+     * Tests Dropbox->delta()
+     */
+    public function testDelta()
+    {
+        $response = $this->dropbox->delta();
+        $this->assertInternalType('array', $response);
+        $this->assertArrayHasKey('reset', $response);
+        $this->assertInternalType('bool', $response['reset']);
+        $this->assertArrayHasKey('cursor', $response);
+        $this->assertArrayHasKey('has_more', $response);
+        $this->assertInternalType('bool', $response['has_more']);
+        $this->assertArrayHasKey('entries', $response);
+        foreach ($response['entries'] as $row) {
+            $this->assertInternalType('array', $row);
+        }
+    }
+
+    /**
+     * Tests Dropbox->revisions()
+     */
+    public function testRevisions()
+    {
+        $response = $this->dropbox->revisions(BASE_PATH .'hàh@, $.txt');
+        $this->assertInternalType('array', $response);
+        foreach ($response as $row) {
+            $this->assertArrayHasKey('revision', $row);
+            $this->assertArrayHasKey('rev', $row);
+            $this->assertArrayHasKey('bytes', $row);
+            $this->assertArrayHasKey('modified', $row);
+            $this->assertArrayHasKey('path', $row);
+            $this->assertArrayHasKey('is_dir', $row);
+            $this->assertArrayHasKey('root', $row);
+            $this->assertArrayHasKey('mime_type', $row);
+            $this->assertArrayHasKey('size', $row);
+        }
+    }
 
     /**
      * Tests Dropbox->thumbnails()

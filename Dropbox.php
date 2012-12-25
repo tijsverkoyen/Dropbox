@@ -764,26 +764,52 @@ class Dropbox
         return (array) $this->doCall($url, $parameters);
     }
 
-	/**
-	 * A way of letting you keep up with changes to files and folders in a user's Dropbox. You can periodically call /delta to get a list of "delta entries", which are instructions on how to update your local state to match the server's state.
-	 *
-	 * @param string[optional] $cursor	A string that is used to keep track of your current state. On the next call pass in this value to return delta entries that have been recorded since the cursor was returned.
-	 * @param string[optional] $locale	The metadata returned will have its size field translated based on the given locale.
-	 * @return array
-	 */
-	public function delta($cursor = null, $locale = null)
-	{
-		// build url
-		$url = '1/delta';
+    /**
+     * A way of letting you keep up with changes to files and folders in a user's Dropbox. You can periodically call /delta to get a list of "delta entries", which are instructions on how to update your local state to match the server's state.
+     *
+     * @param  string[optional] $cursor A string that is used to keep track of your current state. On the next call pass in this value to return delta entries that have been recorded since the cursor was returned.
+     * @param  string[optional] $locale The metadata returned will have its size field translated based on the given locale.
+     * @return array
+     */
+    public function delta($cursor = null, $locale = null)
+    {
+        // build url
+        $url = '1/delta';
 
-		// build parameters
-		$parameters = null;
-		$parameters['cursor'] = (string) $cursor;
-		if($locale !== null) $parameters['locale'] = (string) $locale;
+        // build parameters
+        $parameters = null;
+        $parameters['cursor'] = (string) $cursor;
+        if($locale !== null) $parameters['locale'] = (string) $locale;
 
-		// make the call
-		return (array) $this->doCall($url, $parameters, 'POST');
-	}
+        // make the call
+        return (array) $this->doCall($url, $parameters, 'POST');
+    }
+
+    /**
+     * Obtains metadata for the previous revisions of a file.
+     * Only revisions up to thirty days old are available (or more if the Dropbox user has Pack-Rat). You can use the revision number in conjunction with the /restore call to revert the file to its previous state.
+     *
+     * @param  string           $path     The path to the file.
+     * @param  int[optional]    $revLimit Default is 10. Max is 1,000. When listing a file, the service will not report listings containing more than the amount specified and will instead respond with a 406 (Not Acceptable) status response.
+     * @param  string[optional] $locale   The metadata returned will have its size field translated based on the given locale.
+     * @param  bool[optional]   $sandbox  The metadata returned will have its size field translated based on the given locale.
+     * @return array
+     */
+    public function revisions($path, $revLimit = 10, $locale = null, $sandbox = false)
+    {
+        // build url
+        $url = '1/revisions/';
+        $url .= ($sandbox) ? 'sandbox/' : 'dropbox/';
+        $url .= trim((string) $path, '/');
+
+        // build parameters
+        $parameters = null;
+        if($revLimit !== null) $parameters['rev_limit'] = (int) $revLimit;
+        if($locale !== null) $parameters['locale'] = (string) $locale;
+
+        // make the call
+        return (array) $this->doCall($url, $parameters);
+    }
 
     /**
      * Gets a thumbnail for an image.
