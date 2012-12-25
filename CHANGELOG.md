@@ -4,6 +4,7 @@
 * Implemented revisions-method.
 * Implemented restore-method.
 * Implemented search-method.
+* Implemented shares-method.
 
 # Changelog since 1.0.6
 

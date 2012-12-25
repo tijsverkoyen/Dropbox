@@ -866,6 +866,30 @@ class Dropbox
     }
 
     /**
+     * Creates and returns a Dropbox link to files or folders users can use to view a preview of the file in a web browser.
+     *
+     * @param  string           $path     The path to the file.
+     * @param  bool             $shortUrl When true (default), the url returned will be shortened using the Dropbox url shortener. If false, the url will link directly to the file's preview page.
+     * @param  string[optional] $locale   The metadata returned will have its size field translated based on the given locale.
+     * @param  bool[optional]   $sandbox  The root relative to which path is specified. Valid values are sandbox and dropbox.
+     * @return array
+     */
+    public function shares($path, $shortUrl = true, $locale = null, $sandbox = false)
+    {
+        // build url
+        $url = '1/shares/';
+        $url .= ($sandbox) ? 'sandbox/' : 'dropbox/';
+        $url .= trim((string) $path, '/');
+
+        // build parameters
+        $parameters['short_url'] = ((bool) $shortUrl) ? 'true' : 'false';
+        if($locale !== null) $parameters['locale'] = (string) $locale;
+
+        // make the call
+        return (array) $this->doCall($url, $parameters, 'POST');
+    }
+
+    /**
      * Gets a thumbnail for an image.
      *
      * @param  string[optional] $path    The path to the file or folder.

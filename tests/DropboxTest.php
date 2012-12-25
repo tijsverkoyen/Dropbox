@@ -220,6 +220,16 @@ class DropboxTest extends PHPUnit_Framework_TestCase
     }
 
     /**
+     * Tests Dropbox->shares()
+     */
+    public function testShares()
+    {
+        $response = $this->dropbox->shares(BASE_PATH);
+        $this->assertArrayHasKey('url', $response);
+        $this->assertArrayHasKey('expires', $response);
+    }
+
+    /**
      * Tests Dropbox->thumbnails()
      */
     public function testThumbnails()
